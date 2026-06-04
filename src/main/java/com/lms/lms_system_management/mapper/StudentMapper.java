@@ -1,0 +1,25 @@
+package com.lms.lms_system_management.mapper;
+
+import com.lms.lms_system_management.dto.request.NewStudentRequest;
+import com.lms.lms_system_management.dto.request.UpdateStudentRequest;
+import com.lms.lms_system_management.dto.response.StudentResponse;
+import com.lms.lms_system_management.model.Group;
+import com.lms.lms_system_management.model.Student;
+import org.mapstruct.*;
+
+@Mapper(componentModel = "spring")
+public interface StudentMapper {
+    @Mapping(target = "id", ignore = true)
+    Student toEntity(NewStudentRequest newStudentRequest);
+
+    @Mapping(target = "id", ignore = true)
+    Student toEntity(NewStudentRequest teacher, Group group);
+
+    @Mapping(target = "groupId", source = "group.id")
+    StudentResponse toResponse(Student student);
+
+    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+    @Mapping(target = "group", ignore = true)
+    @Mapping(target = "id", ignore = true)
+    void updateStudent(UpdateStudentRequest request, @MappingTarget Student student);
+}
