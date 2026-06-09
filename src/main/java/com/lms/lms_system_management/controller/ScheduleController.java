@@ -7,7 +7,16 @@ import com.lms.lms_system_management.service.ScheduleService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+
 
 import java.util.List;
 
@@ -24,20 +33,20 @@ public class ScheduleController {
         return scheduleService.assignCourseTime(request);
     }
 
-    @PutMapping("/{schedule_id}")
+    @PutMapping("/{scheduleId}")
     public ScheduleResponse update(@RequestBody UpdateScheduleRequest request,
                                    @PathVariable("schedule_id") Long id) {
         return scheduleService.update(id, request);
     }
 
-    @DeleteMapping("/{schedule_id}")
+    @DeleteMapping("/{scheduleId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void delete(@PathVariable("schedule_id") Long id) {
+    public void delete(@PathVariable("scheduleId") Long id) {
         scheduleService.delete(id);
     }
 
-    @GetMapping("/groups/{group_id}")
-    public List<ScheduleResponse> getScheduleByGroup(@PathVariable("group_id") Long id) {
+    @GetMapping("/groups/{groupId}")
+    public List<ScheduleResponse> getScheduleByGroup(@PathVariable("groupId") Long id) {
         return scheduleService.getScheduleByGroup(id);
     }
 }

@@ -26,7 +26,6 @@ public class StudentServiceImpl implements StudentService {
     private final StudentMapper studentMapper;
     private final GroupRepository groupRepository;
 
-    @Transactional
     @Override
     public StudentResponse create(NewStudentRequest newStudentRequest) {
         Student student = studentMapper.toEntity(newStudentRequest);

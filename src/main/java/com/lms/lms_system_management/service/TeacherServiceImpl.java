@@ -27,7 +27,6 @@ public class TeacherServiceImpl implements TeacherService {
     private final ScheduleRepository scheduleRepository;
     private final ScheduleMapper scheduleMapper;
 
-    @Transactional
     @Override
     public TeacherResponse create(NewTeacherRequest teacher) {
 

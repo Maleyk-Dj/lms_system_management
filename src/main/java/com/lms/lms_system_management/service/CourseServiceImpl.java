@@ -24,7 +24,6 @@ public class CourseServiceImpl implements CourseService{
     private final CourseMapper courseMapper;
     private final TeacherRepository teacherRepository;
 
-    @Transactional
     @Override
     public CourseResponse create(NewCourseRequest newCourseRequest) {
         Long teacherId=newCourseRequest.teacherId();

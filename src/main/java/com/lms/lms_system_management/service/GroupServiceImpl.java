@@ -21,7 +21,6 @@ public class GroupServiceImpl implements GroupService {
     private final GroupRepository groupRepository;
     private final GroupMapper groupMapper;
 
-    @Transactional
     @Override
     public GroupResponse create(NewGroupRequest newGroup) {
         Group saved=groupRepository.save(groupMapper.toEntity(newGroup));

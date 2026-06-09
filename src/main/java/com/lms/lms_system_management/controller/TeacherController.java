@@ -7,8 +7,15 @@ import com.lms.lms_system_management.service.TeacherService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
-
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import java.util.List;
 
 @RestController
@@ -25,8 +32,8 @@ public class TeacherController {
         return teacherService.create(newTeacherRequest);
     }
 
-    @GetMapping("/{teacher_id}")
-    public TeacherResponse getTeacher(@PathVariable("teacher_id") Long id) {
+    @GetMapping("/{teacherId}")
+    public TeacherResponse getTeacher(@PathVariable("teacherId") Long id) {
         return teacherService.getById(id);
     }
 
@@ -35,15 +42,15 @@ public class TeacherController {
         return teacherService.getAll();
     }
 
-    @PutMapping("/{teacher_id}")
+    @PutMapping("/{teacherId}")
     public TeacherResponse update(@RequestBody UpdateTeacherRequest updateTeacherRequest,
-                                  @PathVariable("teacher_id") Long id) {
+                                  @PathVariable("teacherId") Long id) {
         return teacherService.update(updateTeacherRequest, id);
     }
 
-    @DeleteMapping("/{teacher_id}")
+    @DeleteMapping("/{teacherId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteById(@PathVariable("teacher_id") Long id) {
+    public void deleteById(@PathVariable("teacherId") Long id) {
         teacherService.deleteById(id);
     }
 }

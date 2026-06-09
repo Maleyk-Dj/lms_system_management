@@ -8,7 +8,17 @@ import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.DeleteMapping;
+
+
+
 
 import java.util.List;
 
@@ -25,8 +35,8 @@ public class GroupController {
         return groupService.create(request);
     }
 
-    @GetMapping("/{group_id}")
-    public GroupResponse getGroupById(@PathVariable("group_id") Long id) {
+    @GetMapping("/{groupId}")
+    public GroupResponse getGroupById(@PathVariable("groupId") Long id) {
         return groupService.findById(id);
     }
 
@@ -35,15 +45,15 @@ public class GroupController {
         return groupService.findAll();
     }
 
-    @PutMapping("/{group_id}")
+    @PutMapping("/{groupId}")
     public GroupResponse updateGroup(@RequestBody UpdateGroupRequest request,
-                                     @PathVariable("group_id") Long id) {
+                                     @PathVariable("groupId") Long id) {
         return groupService.update(request, id);
     }
 
-    @DeleteMapping("/{group_id}")
+    @DeleteMapping("/{groupId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteGroup(@PathVariable("group_id") Long id) {
+    public void deleteGroup(@PathVariable("groupId") Long id) {
         groupService.deleteById(id);
     }
 }

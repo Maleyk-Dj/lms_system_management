@@ -7,8 +7,15 @@ import com.lms.lms_system_management.service.CourseService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
-
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import java.util.List;
 
 @RestController
@@ -25,8 +32,8 @@ public class CourseController {
         return courseService.create(request);
     }
 
-    @GetMapping("/{course_id}")
-    public CourseResponse getCourse(@PathVariable("course_id") Long id) {
+    @GetMapping("/{courseId}")
+    public CourseResponse getCourse(@PathVariable("courseId") Long id) {
         return courseService.findById(id);
     }
 
@@ -35,15 +42,15 @@ public class CourseController {
         return courseService.findAll();
     }
 
-    @PutMapping("/{course_id}")
+    @PutMapping("/{courseId}")
     public CourseResponse updateCourse(@RequestBody UpdateCourseRequest request,
-                                       @PathVariable("course_id") Long id) {
+                                       @PathVariable("courseId") Long id) {
         return courseService.update(request, id);
     }
 
-    @DeleteMapping("/{course_id}")
+    @DeleteMapping("/{courseId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteCourse(@PathVariable("course_id") Long id) {
+    public void deleteCourse(@PathVariable("courseId") Long id) {
         courseService.delete(id);
     }
 }
