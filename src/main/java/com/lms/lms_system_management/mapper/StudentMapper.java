@@ -13,7 +13,7 @@ public interface StudentMapper {
     Student toEntity(NewStudentRequest newStudentRequest);
 
     @Mapping(target = "id", ignore = true)
-    Student toEntity(NewStudentRequest teacher, Group group);
+    Student toEntity(NewStudentRequest request, Group group);
 
     @Mapping(target = "groupId", source = "group.id")
     StudentResponse toResponse(Student student);

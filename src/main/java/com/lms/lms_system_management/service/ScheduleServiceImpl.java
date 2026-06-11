@@ -66,6 +66,7 @@ public class ScheduleServiceImpl implements ScheduleService{
     @Transactional (readOnly=true)
     @Override
     public List<ScheduleResponse> getScheduleByGroup(Long groupId) {
+
         return scheduleRepository.findAllByGroup_Id(groupId)
                 .stream()
                 .map(scheduleMapper::toResponse)

@@ -72,6 +72,8 @@ public class TeacherServiceImpl implements TeacherService {
     @Transactional(readOnly=true)
     @Override
     public List<ScheduleResponse> getScheduleByTeacher(Long id) {
+        teacherRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Преподаватель с id " + id + " не найден"));
         return scheduleRepository.findByCourse_Teacher_Id(id)
                 .stream()
                 .map(scheduleMapper::toResponse)

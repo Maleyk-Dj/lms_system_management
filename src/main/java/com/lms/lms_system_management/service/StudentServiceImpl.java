@@ -28,7 +28,9 @@ public class StudentServiceImpl implements StudentService {
 
     @Override
     public StudentResponse create(NewStudentRequest newStudentRequest) {
-        Student student = studentMapper.toEntity(newStudentRequest);
+        Group group = groupRepository.findById(newStudentRequest.groupId())
+                .orElseThrow(() -> new NotFoundException("Группа с id " + newStudentRequest.groupId() + " не найдена"));
+        Student student = studentMapper.toEntity(newStudentRequest, group);
         return studentMapper.toResponse(studentRepository.save(student));
     }
 

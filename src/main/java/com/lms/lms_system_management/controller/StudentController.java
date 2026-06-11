@@ -4,6 +4,7 @@ import com.lms.lms_system_management.dto.request.NewStudentRequest;
 import com.lms.lms_system_management.dto.request.UpdateStudentRequest;
 import com.lms.lms_system_management.dto.response.StudentResponse;
 import com.lms.lms_system_management.service.StudentService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
@@ -13,10 +14,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.PatchMapping;
 
 import java.util.List;
 
@@ -30,7 +30,7 @@ public class StudentController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public StudentResponse create(@RequestBody NewStudentRequest request) {
+    public StudentResponse create(@Valid @RequestBody NewStudentRequest request) {
         return studentService.create(request);
     }
 
@@ -44,9 +44,9 @@ public class StudentController {
         return studentService.getAll();
     }
 
-    @PutMapping("/{studentId}")
+    @PatchMapping("/{studentId}")
     public StudentResponse update(@PathVariable("studentId") Long id,
-                                  @RequestBody UpdateStudentRequest request) {
+                                  @Valid @RequestBody UpdateStudentRequest request) {
         return studentService.update(request, id);
     }
 

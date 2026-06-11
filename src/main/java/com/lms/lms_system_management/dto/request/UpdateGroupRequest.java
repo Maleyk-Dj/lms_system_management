@@ -1,10 +1,9 @@
 package com.lms.lms_system_management.dto.request;
 
-import com.lms.lms_system_management.dto.response.StudentResponse;
-
-import java.util.List;
+import jakarta.validation.constraints.NotBlank;
 
 public record UpdateGroupRequest(
+        @NotBlank
         String name
 ) {
 }

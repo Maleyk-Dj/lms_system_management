@@ -4,6 +4,7 @@ import com.lms.lms_system_management.dto.request.NewScheduleRequest;
 import com.lms.lms_system_management.dto.request.UpdateScheduleRequest;
 import com.lms.lms_system_management.dto.response.ScheduleResponse;
 import com.lms.lms_system_management.service.ScheduleService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
@@ -29,13 +30,13 @@ public class ScheduleController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public ScheduleResponse assignCourseTime(@RequestBody NewScheduleRequest request) {
+    public ScheduleResponse assignCourseTime(@Valid @RequestBody NewScheduleRequest request) {
         return scheduleService.assignCourseTime(request);
     }
 
     @PutMapping("/{scheduleId}")
-    public ScheduleResponse update(@RequestBody UpdateScheduleRequest request,
-                                   @PathVariable("schedule_id") Long id) {
+    public ScheduleResponse update(@Valid @RequestBody UpdateScheduleRequest request,
+                                   @PathVariable("scheduleId") Long id) {
         return scheduleService.update(id, request);
     }
 
