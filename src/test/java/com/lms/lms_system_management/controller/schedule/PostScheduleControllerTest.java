@@ -1,11 +1,10 @@
-package com.lms.lms_system_management;
+package com.lms.lms_system_management.controller.schedule;
 
 import com.lms.lms_system_management.dao.CourseRepository;
 import com.lms.lms_system_management.dao.GroupRepository;
 import com.lms.lms_system_management.dao.ScheduleRepository;
 import com.lms.lms_system_management.dao.TeacherRepository;
 import com.lms.lms_system_management.dto.request.NewScheduleRequest;
-import com.lms.lms_system_management.dto.request.UpdateScheduleRequest;
 import com.lms.lms_system_management.dto.response.ScheduleResponse;
 import com.lms.lms_system_management.model.Course;
 import com.lms.lms_system_management.model.Group;
@@ -18,10 +17,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.context.annotation.Import;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.testcontainers.utility.TestcontainersConfiguration;
 
 import java.time.LocalDateTime;
 
@@ -29,8 +27,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Import(TestcontainersConfiguration.class)
-public class ScheduleControllerTest {
-
+public class PostScheduleControllerTest {
     @Autowired
     private TestRestTemplate restTemplate;
 
@@ -88,9 +85,6 @@ public class ScheduleControllerTest {
         groupRepository.deleteAll();
         teacherRepository.deleteAll();
     }
-
-    // CREATE
-
     @Test
     void assignCourseTime_shouldReturn201AndCorrectBody() {
         LocalDateTime newDate = LocalDateTime.of(2026, 8, 1, 9, 0);
@@ -176,139 +170,5 @@ public class ScheduleControllerTest {
         );
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
-    }
-
-    // UPDATE
-
-    @Test
-    void updateSchedule_shouldReturn200AndUpdatedBody() {
-        LocalDateTime updatedDate = LocalDateTime.of(2026, 9, 15, 14, 0);
-        UpdateScheduleRequest request = new UpdateScheduleRequest(groupId, courseId, updatedDate);
-
-        ResponseEntity<ScheduleResponse> response = restTemplate.exchange(
-                "/api/schedules/{scheduleId}",
-                HttpMethod.PUT,
-                new HttpEntity<>(request),
-                ScheduleResponse.class,
-                scheduleId
-        );
-
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-
-        ScheduleResponse body = response.getBody();
-
-        assertThat(body).isNotNull();
-        assertThat(body.id()).isEqualTo(scheduleId);
-        assertThat(body.group().id()).isEqualTo(groupId);
-        assertThat(body.course().id()).isEqualTo(courseId);
-        assertThat(body.date()).isEqualTo(updatedDate);
-    }
-
-    @Test
-    void updateSchedule_whenGroupIdIsNull_shouldReturn400() {
-        UpdateScheduleRequest request = new UpdateScheduleRequest(null, courseId, scheduleDate);
-
-        ResponseEntity<Void> response = restTemplate.exchange(
-                "/api/schedules/{scheduleId}",
-                HttpMethod.PUT,
-                new HttpEntity<>(request),
-                Void.class,
-                scheduleId
-        );
-
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
-    }
-
-    @Test
-    void updateSchedule_whenNotExists_shouldReturn404() {
-        UpdateScheduleRequest request = new UpdateScheduleRequest(groupId, courseId, scheduleDate);
-
-        ResponseEntity<Void> response = restTemplate.exchange(
-                "/api/schedules/{scheduleId}",
-                HttpMethod.PUT,
-                new HttpEntity<>(request),
-                Void.class,
-                99999L
-        );
-
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
-    }
-
-    // DELETE
-
-    @Test
-    void deleteSchedule_shouldReturn204AndRemoveFromDb() {
-        ResponseEntity<Void> response = restTemplate.exchange(
-                "/api/schedules/{scheduleId}",
-                HttpMethod.DELETE,
-                HttpEntity.EMPTY,
-                Void.class,
-                scheduleId
-        );
-
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
-        assertThat(scheduleRepository.findById(scheduleId)).isEmpty();
-    }
-
-    @Test
-    void deleteSchedule_whenNotExists_shouldReturn404() {
-        ResponseEntity<Void> response = restTemplate.exchange(
-                "/api/schedules/{scheduleId}",
-                HttpMethod.DELETE,
-                HttpEntity.EMPTY,
-                Void.class,
-                99999L
-        );
-
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
-    }
-
-    // GET by group
-
-    @Test
-    void getScheduleByGroup_shouldReturn200AndNonEmptyList() {
-        ResponseEntity<ScheduleResponse[]> response = restTemplate.getForEntity(
-                "/api/schedules/groups/{groupId}",
-                ScheduleResponse[].class,
-                groupId
-        );
-
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-
-        ScheduleResponse[] body = response.getBody();
-
-        assertThat(body).isNotNull();
-        assertThat(body.length).isGreaterThan(0);
-        assertThat(body[0].group().id()).isEqualTo(groupId);
-    }
-
-    @Test
-    void getScheduleByGroup_whenGroupNotExists_shouldReturn404() {
-        ResponseEntity<Void> response = restTemplate.getForEntity(
-                "/api/schedules/groups/{groupId}",
-                Void.class,
-                99999L
-        );
-
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
-    }
-
-    @Test
-    void getScheduleByGroup_whenNoSchedules_shouldReturn200AndEmptyList() {
-        Group emptyGroup = Group.builder().name("Gruppa B").build();
-        groupRepository.save(emptyGroup);
-
-        ResponseEntity<ScheduleResponse[]> response = restTemplate.getForEntity(
-                "/api/schedules/groups/{groupId}",
-                ScheduleResponse[].class,
-                emptyGroup.getId()
-        );
-
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-
-        ScheduleResponse[] body = response.getBody();
-
-        assertThat(body).isNotNull();
-        assertThat(body.length).isEqualTo(0);
     }
 }

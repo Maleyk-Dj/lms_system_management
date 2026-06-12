@@ -1,8 +1,7 @@
-package com.lms.lms_system_management;
+package com.lms.lms_system_management.controller.course;
 
 import com.lms.lms_system_management.dao.CourseRepository;
 import com.lms.lms_system_management.dao.TeacherRepository;
-import com.lms.lms_system_management.dto.request.NewCourseRequest;
 import com.lms.lms_system_management.dto.request.UpdateCourseRequest;
 import com.lms.lms_system_management.dto.response.CourseResponse;
 import com.lms.lms_system_management.model.Course;
@@ -18,12 +17,13 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.testcontainers.utility.TestcontainersConfiguration;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Import(TestcontainersConfiguration.class)
-public class CourseControlletTest {
+public class PutCourseControllerTest {
     @Autowired
     private TestRestTemplate restTemplate;
 
@@ -66,119 +66,6 @@ public class CourseControlletTest {
         courseRepository.deleteAll();
         teacherRepository.deleteAll();
     }
-
-    @Test
-    void createCourse_shouldReturn201AndCorrectBody() {
-        NewCourseRequest request = new NewCourseRequest("Spring", "Kurs po Spring", teacherId);
-        ResponseEntity<CourseResponse> response = restTemplate.postForEntity(
-                "/api/courses",
-                request,
-                CourseResponse.class);
-
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
-
-        CourseResponse body = response.getBody();
-
-        assertThat(body).isNotNull();
-        assertThat(body.id()).isNotNull();
-        assertThat(body.name()).isEqualTo("Spring");
-        assertThat(body.description()).isEqualTo("Kurs po Spring");
-        assertThat(body.teacher()).isNotNull();
-        assertThat(body.teacher().id()).isNotNull();
-    }
-
-    @Test
-    void createCourse_WhenNameIsBlank_shouldReturn400() {
-        NewCourseRequest request = new NewCourseRequest("", "Kurs po Spring", teacherId);
-        ResponseEntity<Void> response = restTemplate.postForEntity(
-                "/api/courses",
-                request,
-                Void.class
-        );
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
-    }
-
-    @Test
-    void createCourse_WhenDescriptionIsBlank_shouldReturn400() {
-        NewCourseRequest request = new NewCourseRequest("Spring", "", teacherId);
-        ResponseEntity<Void> response = restTemplate.postForEntity(
-                "/api/courses",
-                request,
-                Void.class
-        );
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
-    }
-
-    @Test
-    void createCourse_WhenTeacherIdIsNull_shouldReturn400() {
-        NewCourseRequest request = new NewCourseRequest("Spring", "Kurs po Spring", null);
-        ResponseEntity<Void> response = restTemplate.postForEntity(
-                "/api/courses",
-                request,
-                Void.class
-        );
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
-    }
-
-    @Test
-    void createCourse_whenTeacherNotExists_shouldReturn404() {
-        NewCourseRequest request = new NewCourseRequest("Spring Boot", "Kurs po Spring", 99999L);
-
-        ResponseEntity<Void> response = restTemplate.postForEntity(
-                "/api/courses",
-                request,
-                Void.class
-        );
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
-    }
-
-    //GET
-    @Test
-    void getCourseById_shouldReturn200AndCorrectBody() {
-        ResponseEntity<CourseResponse> response = restTemplate.getForEntity(
-                "/api/courses/{id}",
-                CourseResponse.class,
-                courseId
-        );
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-
-        CourseResponse body = response.getBody();
-
-        assertThat(body).isNotNull();
-        assertThat(body.id()).isEqualTo(courseId);
-        assertThat(body.name()).isEqualTo("Spring");
-        assertThat(body.description()).isEqualTo("Kurs po Spring");
-        assertThat(body.teacher().id()).isEqualTo(teacherId);
-    }
-
-    @Test
-    void getCourseById_whenNotExists_shouldReturn404() {
-        ResponseEntity<Void> response = restTemplate.getForEntity(
-                "/api/courses/{id}",
-                Void.class,
-                999999L
-        );
-
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
-    }
-
-    @Test
-    void getAllCourses_shouldReturn200AndNonEmptyList() {
-        ResponseEntity<CourseResponse[]> response = restTemplate.getForEntity(
-                "/api/courses",
-                CourseResponse[].class
-        );
-
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-
-        CourseResponse[] body = response.getBody();
-
-        assertThat(body).isNotNull();
-        assertThat(body.length).isGreaterThan(0);
-    }
-
-    //update
-
     @Test
     void updateCourse_shouldReturn200AndUpdatedBody() {
         UpdateCourseRequest request = new UpdateCourseRequest(
@@ -263,19 +150,5 @@ public class CourseControlletTest {
                 99999L
         );
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
-    }
-    //delete
-    @Test
-    void deleteCourse_shouldReturn204AndRemoveFromBd() {
-        ResponseEntity<Void> response = restTemplate.exchange(
-                "/api/courses/{id}",
-                HttpMethod.DELETE,
-                HttpEntity.EMPTY,
-                Void.class,
-                courseId
-        );
-
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
-        assertThat(courseRepository.findById(courseId)).isEmpty();
     }
 }

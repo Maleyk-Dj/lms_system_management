@@ -66,7 +66,8 @@ public class ScheduleServiceImpl implements ScheduleService{
     @Transactional (readOnly=true)
     @Override
     public List<ScheduleResponse> getScheduleByGroup(Long groupId) {
-
+        Group group=groupRepository.findById(groupId)
+                .orElseThrow(() -> new NotFoundException("Группа с "+groupId+ " не найдена"));
         return scheduleRepository.findAllByGroup_Id(groupId)
                 .stream()
                 .map(scheduleMapper::toResponse)
