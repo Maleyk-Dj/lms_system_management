@@ -4,7 +4,7 @@ import com.lms.lms_system_management.dao.CourseRepository;
 import com.lms.lms_system_management.dao.GroupRepository;
 import com.lms.lms_system_management.dao.ScheduleRepository;
 import com.lms.lms_system_management.dao.TeacherRepository;
-import com.lms.lms_system_management.dto.response.ScheduleResponse;
+import com.lms.lms_system_management.dto.schedule.ScheduleResponse;
 import com.lms.lms_system_management.model.Course;
 import com.lms.lms_system_management.model.Group;
 import com.lms.lms_system_management.model.Schedule;

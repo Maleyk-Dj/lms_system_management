@@ -2,10 +2,10 @@ package com.lms.lms_system_management.service;
 
 import com.lms.lms_system_management.dao.ScheduleRepository;
 import com.lms.lms_system_management.dao.TeacherRepository;
-import com.lms.lms_system_management.dto.request.NewTeacherRequest;
-import com.lms.lms_system_management.dto.request.UpdateTeacherRequest;
-import com.lms.lms_system_management.dto.response.ScheduleResponse;
-import com.lms.lms_system_management.dto.response.TeacherResponse;
+import com.lms.lms_system_management.dto.teacher.NewTeacherRequest;
+import com.lms.lms_system_management.dto.teacher.UpdateTeacherRequest;
+import com.lms.lms_system_management.dto.schedule.ScheduleResponse;
+import com.lms.lms_system_management.dto.teacher.TeacherResponse;
 import com.lms.lms_system_management.exception.NotFoundException;
 import com.lms.lms_system_management.mapper.ScheduleMapper;
 import com.lms.lms_system_management.mapper.TeacherMapper;
@@ -168,7 +168,7 @@ class TeacherServiceImplTest {
         ScheduleResponse scheduleResponse = new ScheduleResponse(10L, null, null, null);
 
         when(teacherRepository.findById(1L)).thenReturn(Optional.of(teacher));
-        when(scheduleRepository.findByCourse_Teacher_Id(1L)).thenReturn(List.of(schedule));
+        when(scheduleRepository.findByCourseTeacherId(1L)).thenReturn(List.of(schedule));
         when(scheduleMapper.toResponse(schedule)).thenReturn(scheduleResponse);
 
         List<ScheduleResponse> result = teacherService.getScheduleByTeacher(1L);
@@ -180,7 +180,7 @@ class TeacherServiceImplTest {
     void getScheduleByTeacher_whenNoSchedules_shouldReturnEmptyList() {
         Teacher teacher = Teacher.builder().id(1L).build();
         when(teacherRepository.findById(1L)).thenReturn(Optional.of(teacher));
-        when(scheduleRepository.findByCourse_Teacher_Id(1L)).thenReturn(List.of());
+        when(scheduleRepository.findByCourseTeacherId(1L)).thenReturn(List.of());
 
         List<ScheduleResponse> result = teacherService.getScheduleByTeacher(1L);
 

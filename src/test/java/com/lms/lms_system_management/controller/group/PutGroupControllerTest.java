@@ -1,8 +1,8 @@
 package com.lms.lms_system_management.controller.group;
 
 import com.lms.lms_system_management.dao.GroupRepository;
-import com.lms.lms_system_management.dto.request.UpdateGroupRequest;
-import com.lms.lms_system_management.dto.response.GroupResponse;
+import com.lms.lms_system_management.dto.group.UpdateGroupRequest;
+import com.lms.lms_system_management.dto.group.GroupResponse;
 import com.lms.lms_system_management.model.Group;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;

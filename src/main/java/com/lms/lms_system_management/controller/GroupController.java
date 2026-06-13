@@ -1,8 +1,8 @@
 package com.lms.lms_system_management.controller;
 
-import com.lms.lms_system_management.dto.request.NewGroupRequest;
-import com.lms.lms_system_management.dto.request.UpdateGroupRequest;
-import com.lms.lms_system_management.dto.response.GroupResponse;
+import com.lms.lms_system_management.dto.group.NewGroupRequest;
+import com.lms.lms_system_management.dto.group.UpdateGroupRequest;
+import com.lms.lms_system_management.dto.group.GroupResponse;
 import com.lms.lms_system_management.service.GroupService;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.RequestBody;

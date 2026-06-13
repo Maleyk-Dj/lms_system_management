@@ -22,7 +22,4 @@ public class Group {
     @Column (nullable = false, length = 100)
     private String name;
 
-    @OneToMany (mappedBy = "group")
-    private List <Student> students;
-
 }

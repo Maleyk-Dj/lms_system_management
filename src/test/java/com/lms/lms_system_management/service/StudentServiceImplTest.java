@@ -2,9 +2,9 @@ package com.lms.lms_system_management.service;
 
 import com.lms.lms_system_management.dao.GroupRepository;
 import com.lms.lms_system_management.dao.StudentRepository;
-import com.lms.lms_system_management.dto.request.NewStudentRequest;
-import com.lms.lms_system_management.dto.request.UpdateStudentRequest;
-import com.lms.lms_system_management.dto.response.StudentResponse;
+import com.lms.lms_system_management.dto.student.NewStudentRequest;
+import com.lms.lms_system_management.dto.student.UpdateStudentRequest;
+import com.lms.lms_system_management.dto.student.StudentResponse;
 import com.lms.lms_system_management.exception.AlreadyExistsException;
 import com.lms.lms_system_management.exception.NotFoundException;
 import com.lms.lms_system_management.mapper.StudentMapper;

@@ -1,8 +1,8 @@
 package com.lms.lms_system_management.service;
 
-import com.lms.lms_system_management.dto.request.NewCourseRequest;
-import com.lms.lms_system_management.dto.request.UpdateCourseRequest;
-import com.lms.lms_system_management.dto.response.CourseResponse;
+import com.lms.lms_system_management.dto.course.NewCourseRequest;
+import com.lms.lms_system_management.dto.course.UpdateCourseRequest;
+import com.lms.lms_system_management.dto.course.CourseResponse;
 
 import java.util.List;
 

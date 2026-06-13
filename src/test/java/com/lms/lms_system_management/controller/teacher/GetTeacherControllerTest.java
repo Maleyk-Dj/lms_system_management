@@ -1,7 +1,7 @@
 package com.lms.lms_system_management.controller.teacher;
 
 import com.lms.lms_system_management.dao.TeacherRepository;
-import com.lms.lms_system_management.dto.response.TeacherResponse;
+import com.lms.lms_system_management.dto.teacher.TeacherResponse;
 import com.lms.lms_system_management.model.Teacher;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;

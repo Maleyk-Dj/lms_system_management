@@ -3,10 +3,9 @@ package com.lms.lms_system_management.service;
 import com.lms.lms_system_management.dao.CourseRepository;
 import com.lms.lms_system_management.dao.GroupRepository;
 import com.lms.lms_system_management.dao.ScheduleRepository;
-import com.lms.lms_system_management.dto.request.NewScheduleRequest;
-import com.lms.lms_system_management.dto.request.UpdateScheduleRequest;
-import com.lms.lms_system_management.dto.response.ScheduleResponse;
-import com.lms.lms_system_management.exception.NotFoundException;
+import com.lms.lms_system_management.dto.schedule.NewScheduleRequest;
+import com.lms.lms_system_management.dto.schedule.UpdateScheduleRequest;
+import com.lms.lms_system_management.dto.schedule.ScheduleResponse;
 import com.lms.lms_system_management.mapper.ScheduleMapper;
 import com.lms.lms_system_management.model.Course;
 import com.lms.lms_system_management.model.Group;
@@ -21,7 +20,7 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class ScheduleServiceImpl implements ScheduleService{
+public class ScheduleServiceImpl implements ScheduleService {
 
     private final GroupRepository groupRepository;
     private final CourseRepository courseRepository;
@@ -30,45 +29,43 @@ public class ScheduleServiceImpl implements ScheduleService{
 
     @Transactional
     @Override
-    public ScheduleResponse assignCourseTime (NewScheduleRequest request) {
-        Group group = groupRepository.findById(request.groupId())
-                .orElseThrow(() -> new NotFoundException("Группа с id "+request.groupId()+ " не найдена"));
-        Course course=courseRepository.findById(request.courseId())
-                .orElseThrow(() -> new NotFoundException("Курс с id "+request.courseId()+ " не найден"));
+    public ScheduleResponse assignCourseTime(NewScheduleRequest request) {
+
+        Group group = groupRepository.findByIdOrThrow(request.groupId());
+        Course course = courseRepository.findByIdOrThrow(request.courseId());
         Schedule schedule = scheduleMapper.toEntity(request, group, course);
-        Schedule saved= scheduleRepository.save(schedule);
+        Schedule saved = scheduleRepository.save(schedule);
         return scheduleMapper.toResponse(saved);
     }
 
     @Transactional
     @Override
     public ScheduleResponse update(Long scheduleId, UpdateScheduleRequest request) {
-        Schedule schedule=scheduleRepository.findById(scheduleId)
-                .orElseThrow(() -> new NotFoundException("Рсаписание с id "+scheduleId+ " не найдено"));
-        Group group = groupRepository.findById(request.groupId())
-                .orElseThrow(() -> new NotFoundException("Группа с id "+request.groupId()+ " не найдена"));
-        Course course=courseRepository.findById(request.courseId())
-                .orElseThrow(() -> new NotFoundException("Курс с id "+request.courseId()+ " не найден"));
-        scheduleMapper.updateSchedule(request,group,course,schedule);
-        Schedule updated=scheduleRepository.save(schedule);
+
+        Schedule schedule = scheduleRepository.findByIdOrThrow(scheduleId);
+        Group group = groupRepository.findByIdOrThrow(request.groupId());
+        Course course = courseRepository.findByIdOrThrow(request.courseId());
+        scheduleMapper.updateSchedule(request, group, course, schedule);
+        Schedule updated = scheduleRepository.save(schedule);
         return scheduleMapper.toResponse(updated);
     }
 
     @Transactional
     @Override
     public void delete(Long id) {
-        Schedule schedule=scheduleRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Расписание с id "+id+ " не найдено"));
+
+        Schedule schedule = scheduleRepository.findByIdOrThrow(id);
         scheduleRepository.delete(schedule);
 
     }
 
-    @Transactional (readOnly=true)
+    @Transactional(readOnly = true)
     @Override
     public List<ScheduleResponse> getScheduleByGroup(Long groupId) {
-        Group group=groupRepository.findById(groupId)
-                .orElseThrow(() -> new NotFoundException("Группа с "+groupId+ " не найдена"));
-        return scheduleRepository.findAllByGroup_Id(groupId)
+
+        Group group = groupRepository.findByIdOrThrow(groupId);
+
+        return scheduleRepository.findAllByGroupId(groupId)
                 .stream()
                 .map(scheduleMapper::toResponse)
                 .toList();

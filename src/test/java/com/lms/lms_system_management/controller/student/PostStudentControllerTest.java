@@ -2,8 +2,8 @@ package com.lms.lms_system_management.controller.student;
 
 import com.lms.lms_system_management.dao.GroupRepository;
 import com.lms.lms_system_management.dao.StudentRepository;
-import com.lms.lms_system_management.dto.request.NewStudentRequest;
-import com.lms.lms_system_management.dto.response.StudentResponse;
+import com.lms.lms_system_management.dto.student.NewStudentRequest;
+import com.lms.lms_system_management.dto.student.StudentResponse;
 import com.lms.lms_system_management.model.Group;
 import com.lms.lms_system_management.model.Student;
 import org.junit.jupiter.api.AfterEach;

@@ -2,8 +2,8 @@ package com.lms.lms_system_management.controller.course;
 
 import com.lms.lms_system_management.dao.CourseRepository;
 import com.lms.lms_system_management.dao.TeacherRepository;
-import com.lms.lms_system_management.dto.request.NewCourseRequest;
-import com.lms.lms_system_management.dto.response.CourseResponse;
+import com.lms.lms_system_management.dto.course.NewCourseRequest;
+import com.lms.lms_system_management.dto.course.CourseResponse;
 import com.lms.lms_system_management.model.Course;
 import com.lms.lms_system_management.model.Teacher;
 import org.junit.jupiter.api.AfterEach;

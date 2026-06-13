@@ -1,8 +1,8 @@
 package com.lms.lms_system_management.controller;
 
-import com.lms.lms_system_management.dto.request.NewStudentRequest;
-import com.lms.lms_system_management.dto.request.UpdateStudentRequest;
-import com.lms.lms_system_management.dto.response.StudentResponse;
+import com.lms.lms_system_management.dto.student.NewStudentRequest;
+import com.lms.lms_system_management.dto.student.UpdateStudentRequest;
+import com.lms.lms_system_management.dto.student.StudentResponse;
 import com.lms.lms_system_management.service.StudentService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

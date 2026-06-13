@@ -1,8 +1,8 @@
 package com.lms.lms_system_management.mapper;
 
-import com.lms.lms_system_management.dto.request.NewScheduleRequest;
-import com.lms.lms_system_management.dto.request.UpdateScheduleRequest;
-import com.lms.lms_system_management.dto.response.ScheduleResponse;
+import com.lms.lms_system_management.dto.schedule.NewScheduleRequest;
+import com.lms.lms_system_management.dto.schedule.UpdateScheduleRequest;
+import com.lms.lms_system_management.dto.schedule.ScheduleResponse;
 import com.lms.lms_system_management.model.Course;
 import com.lms.lms_system_management.model.Group;
 import com.lms.lms_system_management.model.Schedule;

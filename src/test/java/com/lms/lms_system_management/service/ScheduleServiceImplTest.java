@@ -3,9 +3,9 @@ package com.lms.lms_system_management.service;
 import com.lms.lms_system_management.dao.CourseRepository;
 import com.lms.lms_system_management.dao.GroupRepository;
 import com.lms.lms_system_management.dao.ScheduleRepository;
-import com.lms.lms_system_management.dto.request.NewScheduleRequest;
-import com.lms.lms_system_management.dto.request.UpdateScheduleRequest;
-import com.lms.lms_system_management.dto.response.ScheduleResponse;
+import com.lms.lms_system_management.dto.schedule.NewScheduleRequest;
+import com.lms.lms_system_management.dto.schedule.UpdateScheduleRequest;
+import com.lms.lms_system_management.dto.schedule.ScheduleResponse;
 import com.lms.lms_system_management.exception.NotFoundException;
 import com.lms.lms_system_management.mapper.ScheduleMapper;
 import com.lms.lms_system_management.model.Course;
@@ -186,7 +186,7 @@ class ScheduleServiceImplTest {
         ScheduleResponse r1 = new ScheduleResponse(1L, null, null, DATE);
         ScheduleResponse r2 = new ScheduleResponse(2L, null, null, DATE.plusDays(1));
 
-        when(scheduleRepository.findAllByGroup_Id(1L)).thenReturn(List.of(s1, s2));
+        when(scheduleRepository.findAllByGroupId(1L)).thenReturn(List.of(s1, s2));
         when(scheduleMapper.toResponse(s1)).thenReturn(r1);
         when(scheduleMapper.toResponse(s2)).thenReturn(r2);
 
@@ -197,7 +197,7 @@ class ScheduleServiceImplTest {
 
     @Test
     void getScheduleByGroup_whenNoSchedules_shouldReturnEmptyList() {
-        when(scheduleRepository.findAllByGroup_Id(1L)).thenReturn(List.of());
+        when(scheduleRepository.findAllByGroupId(1L)).thenReturn(List.of());
 
         List<ScheduleResponse> result = scheduleService.getScheduleByGroup(1L);
 

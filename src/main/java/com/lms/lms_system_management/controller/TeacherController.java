@@ -1,9 +1,9 @@
 package com.lms.lms_system_management.controller;
 
-import com.lms.lms_system_management.dto.request.NewTeacherRequest;
-import com.lms.lms_system_management.dto.request.UpdateTeacherRequest;
-import com.lms.lms_system_management.dto.response.ScheduleResponse;
-import com.lms.lms_system_management.dto.response.TeacherResponse;
+import com.lms.lms_system_management.dto.teacher.NewTeacherRequest;
+import com.lms.lms_system_management.dto.teacher.UpdateTeacherRequest;
+import com.lms.lms_system_management.dto.schedule.ScheduleResponse;
+import com.lms.lms_system_management.dto.teacher.TeacherResponse;
 import com.lms.lms_system_management.service.TeacherService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
