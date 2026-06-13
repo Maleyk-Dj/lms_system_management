@@ -1,10 +1,11 @@
 package com.lms.lms_system_management.controller;
 
-import com.lms.lms_system_management.dto.request.NewGroupRequest;
-import com.lms.lms_system_management.dto.request.UpdateGroupRequest;
-import com.lms.lms_system_management.dto.response.GroupResponse;
+import com.lms.lms_system_management.dto.group.NewGroupRequest;
+import com.lms.lms_system_management.dto.group.UpdateGroupRequest;
+import com.lms.lms_system_management.dto.group.GroupResponse;
 import com.lms.lms_system_management.service.GroupService;
-import io.swagger.v3.oas.annotations.parameters.RequestBody;
+import jakarta.validation.Valid;
+import org.springframework.web.bind.annotation.RequestBody;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
@@ -31,7 +32,7 @@ public class GroupController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public GroupResponse createGroup(@RequestBody NewGroupRequest request) {
+    public GroupResponse createGroup(@Valid @RequestBody NewGroupRequest request) {
         return groupService.create(request);
     }
 
@@ -46,7 +47,7 @@ public class GroupController {
     }
 
     @PutMapping("/{groupId}")
-    public GroupResponse updateGroup(@RequestBody UpdateGroupRequest request,
+    public GroupResponse updateGroup(@Valid @RequestBody UpdateGroupRequest request,
                                      @PathVariable("groupId") Long id) {
         return groupService.update(request, id);
     }

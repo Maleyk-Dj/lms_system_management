@@ -1,9 +1,10 @@
 package com.lms.lms_system_management.controller;
 
-import com.lms.lms_system_management.dto.request.NewCourseRequest;
-import com.lms.lms_system_management.dto.request.UpdateCourseRequest;
-import com.lms.lms_system_management.dto.response.CourseResponse;
+import com.lms.lms_system_management.dto.course.NewCourseRequest;
+import com.lms.lms_system_management.dto.course.UpdateCourseRequest;
+import com.lms.lms_system_management.dto.course.CourseResponse;
 import com.lms.lms_system_management.service.CourseService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
@@ -28,7 +29,7 @@ public class CourseController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public CourseResponse createCourse(@RequestBody NewCourseRequest request) {
+    public CourseResponse createCourse(@Valid @RequestBody NewCourseRequest request) {
         return courseService.create(request);
     }
 
@@ -43,7 +44,7 @@ public class CourseController {
     }
 
     @PutMapping("/{courseId}")
-    public CourseResponse updateCourse(@RequestBody UpdateCourseRequest request,
+    public CourseResponse updateCourse(@Valid @RequestBody UpdateCourseRequest request,
                                        @PathVariable("courseId") Long id) {
         return courseService.update(request, id);
     }

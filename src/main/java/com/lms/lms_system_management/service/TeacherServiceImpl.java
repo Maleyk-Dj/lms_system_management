@@ -2,11 +2,10 @@ package com.lms.lms_system_management.service;
 
 import com.lms.lms_system_management.dao.ScheduleRepository;
 import com.lms.lms_system_management.dao.TeacherRepository;
-import com.lms.lms_system_management.dto.request.NewTeacherRequest;
-import com.lms.lms_system_management.dto.request.UpdateTeacherRequest;
-import com.lms.lms_system_management.dto.response.ScheduleResponse;
-import com.lms.lms_system_management.dto.response.TeacherResponse;
-import com.lms.lms_system_management.exception.NotFoundException;
+import com.lms.lms_system_management.dto.teacher.NewTeacherRequest;
+import com.lms.lms_system_management.dto.teacher.UpdateTeacherRequest;
+import com.lms.lms_system_management.dto.schedule.ScheduleResponse;
+import com.lms.lms_system_management.dto.teacher.TeacherResponse;
 import com.lms.lms_system_management.mapper.ScheduleMapper;
 import com.lms.lms_system_management.mapper.TeacherMapper;
 import com.lms.lms_system_management.model.Teacher;
@@ -34,16 +33,17 @@ public class TeacherServiceImpl implements TeacherService {
         return teacherMapper.toResponse(saved);
     }
 
-    @Transactional(readOnly=true)
     @Override
     public TeacherResponse getById(Long id) {
-        Teacher teacherEntity = teacherRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Преподаватель с id " + id + " не найден"));
+
+        Teacher teacherEntity = teacherRepository.findByIdOrThrow(id);
         return teacherMapper.toResponse(teacherEntity);
     }
-    @Transactional(readOnly=true)
+
+    @Transactional(readOnly = true)
     @Override
     public List<TeacherResponse> getAll() {
+
         return teacherRepository.findAll()
                 .stream()
                 .map(teacherMapper::toResponse)
@@ -52,27 +52,30 @@ public class TeacherServiceImpl implements TeacherService {
 
     @Transactional
     @Override
-    public TeacherResponse update (UpdateTeacherRequest teacher, Long id) {
-        Teacher updated = teacherRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Преподаватель с " + id + " не найден"));
+    public TeacherResponse update(UpdateTeacherRequest teacher, Long id) {
+
+        Teacher updated = teacherRepository.findByIdOrThrow(id);
         teacherMapper.updateEntity(teacher, updated);
-        Teacher saved=teacherRepository.save(updated);
+        Teacher saved = teacherRepository.save(updated);
         return teacherMapper.toResponse(saved);
     }
 
     @Transactional
     @Override
     public void deleteById(Long id) {
-        Teacher deleted = teacherRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Преподаватель с " + id + " не найден"));
+
+        Teacher deleted = teacherRepository.findByIdOrThrow(id);
         teacherRepository.delete(deleted);
 
     }
 
-    @Transactional(readOnly=true)
+    @Transactional(readOnly = true)
     @Override
     public List<ScheduleResponse> getScheduleByTeacher(Long id) {
-        return scheduleRepository.findByCourse_Teacher_Id(id)
+
+        teacherRepository.findByIdOrThrow(id);
+
+        return scheduleRepository.findByCourseTeacherId(id)
                 .stream()
                 .map(scheduleMapper::toResponse)
                 .toList();
