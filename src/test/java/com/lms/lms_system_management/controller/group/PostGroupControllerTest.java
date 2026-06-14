@@ -1,5 +1,6 @@
 package com.lms.lms_system_management.controller.group;
 
+import com.lms.lms_system_management.TestcontainersConfiguration;
 import com.lms.lms_system_management.dao.GroupRepository;
 import com.lms.lms_system_management.dto.group.NewGroupRequest;
 import com.lms.lms_system_management.dto.group.GroupResponse;
@@ -13,13 +14,12 @@ import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.testcontainers.utility.TestcontainersConfiguration;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Import(TestcontainersConfiguration.class)
-public class PostGroupControllerTest {
+class PostGroupControllerTest {
 
     @Autowired
     private TestRestTemplate restTemplate;
@@ -42,6 +42,7 @@ public class PostGroupControllerTest {
     public void tearDown() {
         groupRepository.deleteAll();
     }
+
     @Test
     void createGroup_shouldReturn201AndCorrectBody() {
         NewGroupRequest request = new NewGroupRequest("Gruppa B");

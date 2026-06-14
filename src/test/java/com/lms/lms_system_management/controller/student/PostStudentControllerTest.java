@@ -1,5 +1,6 @@
 package com.lms.lms_system_management.controller.student;
 
+import com.lms.lms_system_management.TestcontainersConfiguration;
 import com.lms.lms_system_management.dao.GroupRepository;
 import com.lms.lms_system_management.dao.StudentRepository;
 import com.lms.lms_system_management.dto.student.NewStudentRequest;
@@ -9,19 +10,23 @@ import com.lms.lms_system_management.model.Student;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.testcontainers.utility.TestcontainersConfiguration;
+
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Import(TestcontainersConfiguration.class)
-public class PostStudentControllerTest {
+class PostStudentControllerTest {
+
     @Autowired
     private TestRestTemplate restTemplate;
     @Autowired
@@ -29,9 +34,7 @@ public class PostStudentControllerTest {
     @Autowired
     private GroupRepository groupRepository;
 
-    private Long studentId;
     private Long groupId;
-    private Long anotherGroupId;
 
     @BeforeEach
     public void setUp() {
@@ -45,7 +48,6 @@ public class PostStudentControllerTest {
                 name("Gruppa B")
                 .build();
         groupRepository.save(anotherGroup);
-        anotherGroupId = anotherGroup.getId();
 
         Student student = Student.builder()
                 .firstName("Valya")
@@ -53,7 +55,6 @@ public class PostStudentControllerTest {
                 .group(group)
                 .build();
         studentRepository.save(student);
-        studentId = student.getId();
     }
 
     @AfterEach
@@ -61,6 +62,7 @@ public class PostStudentControllerTest {
         studentRepository.deleteAll();
         groupRepository.deleteAll();
     }
+
     @Test
     void createStudent_shouldReturn201AndCorrectBody() {
         NewStudentRequest request = new NewStudentRequest("Petr", "Petrov", groupId);
@@ -79,38 +81,25 @@ public class PostStudentControllerTest {
         assertThat(body.groupId()).isEqualTo(groupId);
     }
 
-    @Test
-    void createStudent_whenFirstNameIsBlank_shouldReturn400() {
-        NewStudentRequest request = new NewStudentRequest("", "Petrov", groupId);
-        ResponseEntity<Void> response = restTemplate.postForEntity(
-                "/api/students",
-                request,
-                Void.class
-        );
-
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
-    }
-
-    @Test
-    void createStudent_whenLastNameIsBlank_shouldReturn400() {
-        NewStudentRequest request = new NewStudentRequest("Petr", "", groupId);
-        ResponseEntity<Void> response = restTemplate.postForEntity(
-                "/api/students",
-                request,
-                Void.class
-        );
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
-    }
-
-    @Test
-    void createStudent_whenGroupIdIsNull_shouldReturn400() {
-        NewStudentRequest request = new NewStudentRequest("Petr", "Petrov", null);
+    @ParameterizedTest
+    @MethodSource("invalidNewStudentRequest")
+    void createStudent_whenIsBlank_shouldReturn400(NewStudentRequest request) {
         ResponseEntity<Void> response = restTemplate.postForEntity(
                 "/api/students"
                 , request,
                 Void.class
         );
+
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+
+    }
+
+    static Stream<NewStudentRequest> invalidNewStudentRequest() {
+        return Stream.of(
+                new NewStudentRequest("", "Petrov", 1L),
+                new NewStudentRequest("Petr", "", 1L),
+                new NewStudentRequest("Petr", "Petrov", null)
+        );
     }
 
     @Test

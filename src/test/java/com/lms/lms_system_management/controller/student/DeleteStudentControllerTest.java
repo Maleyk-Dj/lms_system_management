@@ -1,5 +1,6 @@
 package com.lms.lms_system_management.controller.student;
 
+import com.lms.lms_system_management.TestcontainersConfiguration;
 import com.lms.lms_system_management.dao.GroupRepository;
 import com.lms.lms_system_management.dao.StudentRepository;
 import com.lms.lms_system_management.model.Group;
@@ -15,13 +16,12 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.testcontainers.utility.TestcontainersConfiguration;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Import(TestcontainersConfiguration.class)
-public class DeleteStudentControllerTest {
+class DeleteStudentControllerTest {
     @Autowired
     private TestRestTemplate restTemplate;
     @Autowired
@@ -30,8 +30,6 @@ public class DeleteStudentControllerTest {
     private GroupRepository groupRepository;
 
     private Long studentId;
-    private Long groupId;
-    private Long anotherGroupId;
 
     @BeforeEach
     public void setUp() {
@@ -39,13 +37,11 @@ public class DeleteStudentControllerTest {
                 name("Gruppa A")
                 .build();
         groupRepository.save(group);
-        groupId = group.getId();
 
         Group anotherGroup = Group.builder().
                 name("Gruppa B")
                 .build();
         groupRepository.save(anotherGroup);
-        anotherGroupId = anotherGroup.getId();
 
         Student student = Student.builder()
                 .firstName("Valya")
@@ -61,6 +57,7 @@ public class DeleteStudentControllerTest {
         studentRepository.deleteAll();
         groupRepository.deleteAll();
     }
+
     @Test
     void deleteStudent_shouldReturn204AndRemoveFromDb() {
         ResponseEntity<Void> response = restTemplate.exchange(
@@ -85,5 +82,4 @@ public class DeleteStudentControllerTest {
         );
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
     }
-
 }

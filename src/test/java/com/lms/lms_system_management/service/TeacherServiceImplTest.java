@@ -4,8 +4,8 @@ import com.lms.lms_system_management.dao.ScheduleRepository;
 import com.lms.lms_system_management.dao.TeacherRepository;
 import com.lms.lms_system_management.dto.teacher.NewTeacherRequest;
 import com.lms.lms_system_management.dto.teacher.UpdateTeacherRequest;
-import com.lms.lms_system_management.dto.schedule.ScheduleResponse;
 import com.lms.lms_system_management.dto.teacher.TeacherResponse;
+import com.lms.lms_system_management.dto.schedule.ScheduleResponse;
 import com.lms.lms_system_management.exception.NotFoundException;
 import com.lms.lms_system_management.mapper.ScheduleMapper;
 import com.lms.lms_system_management.mapper.TeacherMapper;
@@ -18,7 +18,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
-import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -68,7 +67,7 @@ class TeacherServiceImplTest {
         Teacher teacher = Teacher.builder().id(1L).firstName("Ivan").lastName("Petrov").build();
         TeacherResponse expected = new TeacherResponse(1L, "Ivan", "Petrov");
 
-        when(teacherRepository.findById(1L)).thenReturn(Optional.of(teacher));
+        when(teacherRepository.findByIdOrThrow(1L)).thenReturn(teacher);
         when(teacherMapper.toResponse(teacher)).thenReturn(expected);
 
         TeacherResponse result = teacherService.getById(1L);
@@ -78,7 +77,7 @@ class TeacherServiceImplTest {
 
     @Test
     void getById_whenNotExists_shouldThrowNotFoundException() {
-        when(teacherRepository.findById(99L)).thenReturn(Optional.empty());
+        when(teacherRepository.findByIdOrThrow(99L)).thenThrow(new NotFoundException("not found"));
 
         assertThatThrownBy(() -> teacherService.getById(99L))
                 .isInstanceOf(NotFoundException.class);
@@ -118,7 +117,7 @@ class TeacherServiceImplTest {
         Teacher saved = Teacher.builder().id(1L).firstName("Anna").lastName("Ivanova").build();
         TeacherResponse expected = new TeacherResponse(1L, "Anna", "Ivanova");
 
-        when(teacherRepository.findById(1L)).thenReturn(Optional.of(teacher));
+        when(teacherRepository.findByIdOrThrow(1L)).thenReturn(teacher);
         when(teacherRepository.save(teacher)).thenReturn(saved);
         when(teacherMapper.toResponse(saved)).thenReturn(expected);
 
@@ -131,7 +130,7 @@ class TeacherServiceImplTest {
     @Test
     void update_whenNotExists_shouldThrowNotFoundException() {
         UpdateTeacherRequest request = new UpdateTeacherRequest("Anna", "Ivanova");
-        when(teacherRepository.findById(99L)).thenReturn(Optional.empty());
+        when(teacherRepository.findByIdOrThrow(99L)).thenThrow(new NotFoundException("not found"));
 
         assertThatThrownBy(() -> teacherService.update(request, 99L))
                 .isInstanceOf(NotFoundException.class);
@@ -143,7 +142,7 @@ class TeacherServiceImplTest {
     @Test
     void deleteById_whenExists_shouldDelete() {
         Teacher teacher = Teacher.builder().id(1L).firstName("Ivan").lastName("Petrov").build();
-        when(teacherRepository.findById(1L)).thenReturn(Optional.of(teacher));
+        when(teacherRepository.findByIdOrThrow(1L)).thenReturn(teacher);
 
         teacherService.deleteById(1L);
 
@@ -152,7 +151,7 @@ class TeacherServiceImplTest {
 
     @Test
     void deleteById_whenNotExists_shouldThrowNotFoundException() {
-        when(teacherRepository.findById(99L)).thenReturn(Optional.empty());
+        when(teacherRepository.findByIdOrThrow(99L)).thenThrow(new NotFoundException("not found"));
 
         assertThatThrownBy(() -> teacherService.deleteById(99L))
                 .isInstanceOf(NotFoundException.class);
@@ -167,7 +166,7 @@ class TeacherServiceImplTest {
         Schedule schedule = Schedule.builder().id(10L).build();
         ScheduleResponse scheduleResponse = new ScheduleResponse(10L, null, null, null);
 
-        when(teacherRepository.findById(1L)).thenReturn(Optional.of(teacher));
+        when(teacherRepository.findByIdOrThrow(1L)).thenReturn(teacher);
         when(scheduleRepository.findByCourseTeacherId(1L)).thenReturn(List.of(schedule));
         when(scheduleMapper.toResponse(schedule)).thenReturn(scheduleResponse);
 
@@ -179,7 +178,7 @@ class TeacherServiceImplTest {
     @Test
     void getScheduleByTeacher_whenNoSchedules_shouldReturnEmptyList() {
         Teacher teacher = Teacher.builder().id(1L).build();
-        when(teacherRepository.findById(1L)).thenReturn(Optional.of(teacher));
+        when(teacherRepository.findByIdOrThrow(1L)).thenReturn(teacher);
         when(scheduleRepository.findByCourseTeacherId(1L)).thenReturn(List.of());
 
         List<ScheduleResponse> result = teacherService.getScheduleByTeacher(1L);
@@ -189,7 +188,7 @@ class TeacherServiceImplTest {
 
     @Test
     void getScheduleByTeacher_whenTeacherNotExists_shouldThrowNotFoundException() {
-        when(teacherRepository.findById(99L)).thenReturn(Optional.empty());
+        when(teacherRepository.findByIdOrThrow(99L)).thenThrow(new NotFoundException("not found"));
 
         assertThatThrownBy(() -> teacherService.getScheduleByTeacher(99L))
                 .isInstanceOf(NotFoundException.class);

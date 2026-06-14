@@ -1,5 +1,6 @@
 package com.lms.lms_system_management.controller.teacher;
 
+import com.lms.lms_system_management.TestcontainersConfiguration;
 import com.lms.lms_system_management.dao.TeacherRepository;
 import com.lms.lms_system_management.model.Teacher;
 import org.junit.jupiter.api.AfterEach;
@@ -13,13 +14,13 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.testcontainers.utility.TestcontainersConfiguration;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Import(TestcontainersConfiguration.class)
-public class DeleteTeacherControllerTest {
+class DeleteTeacherControllerTest {
+
     @Autowired
     private TestRestTemplate testRestTemplate;
 

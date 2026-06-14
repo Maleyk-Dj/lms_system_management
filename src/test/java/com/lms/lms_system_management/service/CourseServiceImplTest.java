@@ -17,7 +17,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
-import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -49,7 +48,7 @@ public class CourseServiceImplTest {
         CourseResponse expected = new CourseResponse(10L, "Java", "Kurs po Java",
                 new TeacherResponse(1L, "Ivan", "Petrov"));
 
-        when(teacherRepository.findById(1L)).thenReturn(Optional.of(teacher));
+        when(teacherRepository.findByIdOrThrow(1L)).thenReturn(teacher);
         when(courseMapper.toEntity(request, teacher)).thenReturn(entity);
         when(courseRepository.save(entity)).thenReturn(saved);
         when(courseMapper.toResponse(saved)).thenReturn(expected);
@@ -63,7 +62,7 @@ public class CourseServiceImplTest {
     @Test
     void create_whenTeacherNotExists_shouldThrowNotFoundException() {
         NewCourseRequest request = new NewCourseRequest("Java", "Kurs po Java", 99L);
-        when(teacherRepository.findById(99L)).thenReturn(Optional.empty());
+        when(teacherRepository.findByIdOrThrow(99L)).thenThrow(new NotFoundException("not found"));
 
         assertThatThrownBy(() -> courseService.create(request))
                 .isInstanceOf(NotFoundException.class);
@@ -79,7 +78,7 @@ public class CourseServiceImplTest {
         CourseResponse expected = new CourseResponse(5L, "Java", "Desc",
                 new TeacherResponse(1L, null, null));
 
-        when(courseRepository.findById(5L)).thenReturn(Optional.of(course));
+        when(courseRepository.findByIdOrThrow(5L)).thenReturn(course);
         when(courseMapper.toResponse(course)).thenReturn(expected);
 
         CourseResponse result = courseService.findById(5L);
@@ -89,7 +88,7 @@ public class CourseServiceImplTest {
 
     @Test
     void findById_whenNotExists_shouldThrowNotFoundException() {
-        when(courseRepository.findById(99L)).thenReturn(Optional.empty());
+        when(courseRepository.findByIdOrThrow(99L)).thenThrow(new NotFoundException("not found"));
 
         assertThatThrownBy(() -> courseService.findById(99L))
                 .isInstanceOf(NotFoundException.class);
@@ -133,8 +132,8 @@ public class CourseServiceImplTest {
         CourseResponse expected = new CourseResponse(5L, "Kotlin", "Kurs po Kotlin",
                 new TeacherResponse(2L, "Anna", "Ivanova"));
 
-        when(courseRepository.findById(5L)).thenReturn(Optional.of(course));
-        when(teacherRepository.findById(2L)).thenReturn(Optional.of(newTeacher));
+        when(courseRepository.findByIdOrThrow(5L)).thenReturn(course);
+        when(teacherRepository.findByIdOrThrow(2L)).thenReturn(newTeacher);
         when(courseRepository.save(course)).thenReturn(saved);
         when(courseMapper.toResponse(saved)).thenReturn(expected);
 
@@ -147,7 +146,7 @@ public class CourseServiceImplTest {
     @Test
     void update_whenCourseNotExists_shouldThrowNotFoundException() {
         UpdateCourseRequest request = new UpdateCourseRequest("Kotlin", "Desc", 1L);
-        when(courseRepository.findById(99L)).thenReturn(Optional.empty());
+        when(courseRepository.findByIdOrThrow(99L)).thenThrow(new NotFoundException("not found"));
 
         assertThatThrownBy(() -> courseService.update(request, 99L))
                 .isInstanceOf(NotFoundException.class);
@@ -160,8 +159,8 @@ public class CourseServiceImplTest {
         Course course = Course.builder().id(5L).name("Java").description("Desc").teacher(teacher).build();
         UpdateCourseRequest request = new UpdateCourseRequest("Kotlin", "Desc", 99L);
 
-        when(courseRepository.findById(5L)).thenReturn(Optional.of(course));
-        when(teacherRepository.findById(99L)).thenReturn(Optional.empty());
+        when(courseRepository.findByIdOrThrow(5L)).thenReturn(course);
+        when(teacherRepository.findByIdOrThrow(99L)).thenThrow(new NotFoundException("not found"));
 
         assertThatThrownBy(() -> courseService.update(request, 5L))
                 .isInstanceOf(NotFoundException.class);
@@ -174,7 +173,7 @@ public class CourseServiceImplTest {
     void delete_whenExists_shouldDelete() {
         Teacher teacher = Teacher.builder().id(1L).build();
         Course course = Course.builder().id(5L).teacher(teacher).build();
-        when(courseRepository.findById(5L)).thenReturn(Optional.of(course));
+        when(courseRepository.findByIdOrThrow(5L)).thenReturn(course);
 
         courseService.delete(5L);
 
@@ -183,7 +182,7 @@ public class CourseServiceImplTest {
 
     @Test
     void delete_whenNotExists_shouldThrowNotFoundException() {
-        when(courseRepository.findById(99L)).thenReturn(Optional.empty());
+        when(courseRepository.findByIdOrThrow(99L)).thenThrow(new NotFoundException("not found"));
 
         assertThatThrownBy(() -> courseService.delete(99L))
                 .isInstanceOf(NotFoundException.class);

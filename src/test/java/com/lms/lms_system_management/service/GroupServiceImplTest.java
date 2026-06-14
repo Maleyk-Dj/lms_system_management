@@ -14,7 +14,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
-import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -58,7 +57,7 @@ public class GroupServiceImplTest {
         Group group = Group.builder().id(1L).name("Gruppa A").build();
         GroupResponse expected = new GroupResponse(1L, "Gruppa A");
 
-        when(groupRepository.findById(1L)).thenReturn(Optional.of(group));
+        when(groupRepository.findByIdOrThrow(1L)).thenReturn(group);
         when(groupMapper.toResponse(group)).thenReturn(expected);
 
         GroupResponse result = groupService.findById(1L);
@@ -68,7 +67,7 @@ public class GroupServiceImplTest {
 
     @Test
     void findById_whenNotExists_shouldThrowNotFoundException() {
-        when(groupRepository.findById(99L)).thenReturn(Optional.empty());
+        when(groupRepository.findByIdOrThrow(99L)).thenThrow(new NotFoundException("not found"));
 
         assertThatThrownBy(() -> groupService.findById(99L))
                 .isInstanceOf(NotFoundException.class);
@@ -108,7 +107,7 @@ public class GroupServiceImplTest {
         Group saved = Group.builder().id(1L).name("Gruppa C").build();
         GroupResponse expected = new GroupResponse(1L, "Gruppa C");
 
-        when(groupRepository.findById(1L)).thenReturn(Optional.of(group));
+        when(groupRepository.findByIdOrThrow(1L)).thenReturn(group);
         when(groupRepository.save(group)).thenReturn(saved);
         when(groupMapper.toResponse(saved)).thenReturn(expected);
 
@@ -121,7 +120,7 @@ public class GroupServiceImplTest {
     @Test
     void update_whenNotExists_shouldThrowNotFoundException() {
         UpdateGroupRequest request = new UpdateGroupRequest("Gruppa C");
-        when(groupRepository.findById(99L)).thenReturn(Optional.empty());
+        when(groupRepository.findByIdOrThrow(99L)).thenThrow(new NotFoundException("not found"));
 
         assertThatThrownBy(() -> groupService.update(request, 99L))
                 .isInstanceOf(NotFoundException.class);
@@ -133,7 +132,7 @@ public class GroupServiceImplTest {
     @Test
     void deleteById_whenExists_shouldDelete() {
         Group group = Group.builder().id(1L).name("Gruppa A").build();
-        when(groupRepository.findById(1L)).thenReturn(Optional.of(group));
+        when(groupRepository.findByIdOrThrow(1L)).thenReturn(group);
 
         groupService.deleteById(1L);
 
@@ -142,7 +141,7 @@ public class GroupServiceImplTest {
 
     @Test
     void deleteById_whenNotExists_shouldThrowNotFoundException() {
-        when(groupRepository.findById(99L)).thenReturn(Optional.empty());
+        when(groupRepository.findByIdOrThrow(99L)).thenThrow(new NotFoundException("not found"));
 
         assertThatThrownBy(() -> groupService.deleteById(99L))
                 .isInstanceOf(NotFoundException.class);

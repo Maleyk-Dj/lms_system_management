@@ -1,5 +1,6 @@
 package com.lms.lms_system_management.controller.schedule;
 
+import com.lms.lms_system_management.TestcontainersConfiguration;
 import com.lms.lms_system_management.dao.CourseRepository;
 import com.lms.lms_system_management.dao.GroupRepository;
 import com.lms.lms_system_management.dao.ScheduleRepository;
@@ -19,7 +20,6 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.testcontainers.utility.TestcontainersConfiguration;
 
 import java.time.LocalDateTime;
 
@@ -27,7 +27,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Import(TestcontainersConfiguration.class)
-public class DeleteScheduleControllerTest {
+class DeleteScheduleControllerTest {
     @Autowired
     private TestRestTemplate restTemplate;
 
@@ -40,10 +40,7 @@ public class DeleteScheduleControllerTest {
     @Autowired
     private TeacherRepository teacherRepository;
 
-    private Long groupId;
-    private Long courseId;
     private Long scheduleId;
-    private LocalDateTime scheduleDate;
 
     @BeforeEach
     public void setUp() {
@@ -57,7 +54,6 @@ public class DeleteScheduleControllerTest {
                 .name("Gruppa A")
                 .build();
         groupRepository.save(group);
-        groupId = group.getId();
 
         Course course = Course.builder()
                 .name("Java")
@@ -65,14 +61,13 @@ public class DeleteScheduleControllerTest {
                 .teacher(teacher)
                 .build();
         courseRepository.save(course);
-        courseId = course.getId();
 
-        scheduleDate = LocalDateTime.of(2026, 7, 1, 10, 0);
+        LocalDateTime scheduleDate = LocalDateTime.of(2026, 7, 1, 10, 0);
 
         Schedule schedule = Schedule.builder()
                 .group(group)
                 .course(course)
-                .date(scheduleDate)
+                .dateClass(scheduleDate)
                 .build();
         scheduleRepository.save(schedule);
         scheduleId = schedule.getId();

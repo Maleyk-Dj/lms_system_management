@@ -1,7 +1,9 @@
 package com.lms.lms_system_management.controller.course;
 
+import com.lms.lms_system_management.TestcontainersConfiguration;
 import com.lms.lms_system_management.dao.CourseRepository;
 import com.lms.lms_system_management.dao.TeacherRepository;
+import com.lms.lms_system_management.dto.course.NewCourseRequest;
 import com.lms.lms_system_management.dto.course.UpdateCourseRequest;
 import com.lms.lms_system_management.dto.course.CourseResponse;
 import com.lms.lms_system_management.model.Course;
@@ -9,6 +11,9 @@ import com.lms.lms_system_management.model.Teacher;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
@@ -17,13 +22,15 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.testcontainers.utility.TestcontainersConfiguration;
+
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Import(TestcontainersConfiguration.class)
 public class PutCourseControllerTest {
+
     @Autowired
     private TestRestTemplate restTemplate;
 
@@ -33,17 +40,16 @@ public class PutCourseControllerTest {
     private TeacherRepository teacherRepository;
 
     private Long courseId;
-    private Long teacherId;
     private Long anotherTeacherId;
 
     @BeforeEach
     public void setup() {
+
         Teacher teacher = Teacher.builder()
                 .firstName("Li")
-                .lastName("Dja").
-                build();
+                .lastName("Dja")
+                .build();
         teacherRepository.save(teacher);
-        teacherId = teacher.getId();
 
         Teacher anotherTeacher = Teacher.builder()
                 .firstName("Ira")
@@ -54,7 +60,7 @@ public class PutCourseControllerTest {
 
         Course course = Course.builder()
                 .name("Java")
-                .description("Kurs po razrabotke Java")
+                .description("Kurs po Java")
                 .teacher(teacher)
                 .build();
         courseRepository.save(course);
@@ -90,41 +96,9 @@ public class PutCourseControllerTest {
         assertThat(body.teacher().id()).isEqualTo(anotherTeacherId);
     }
 
-    @Test
-    void updateCourse_whenNameIsBlank_shouldReturn400() {
-        UpdateCourseRequest request = new UpdateCourseRequest(
-                "", "Kurs po Kotlin", anotherTeacherId);
-
-        ResponseEntity<Void> response = restTemplate.exchange(
-                "/api/courses/{id}",
-                HttpMethod.PUT,
-                new HttpEntity<>(request),
-                Void.class,
-                courseId
-        );
-
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
-    }
-
-    @Test
-    void updateCourse_whenDescriptionIsNull_shouldReturn400() {
-        UpdateCourseRequest request = new UpdateCourseRequest("Kotlin", "", anotherTeacherId);
-
-        ResponseEntity<Void> response = restTemplate.exchange(
-                "/api/courses/{id}",
-                HttpMethod.PUT,
-                new HttpEntity<>(request),
-                Void.class,
-                courseId
-        );
-
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
-    }
-
-    @Test
-    void updateCourse_whenTeacherNotExists_shouldReturn404() {
-        UpdateCourseRequest request = new UpdateCourseRequest(
-                "Spring Boot", "Kurs po Spring", 99999L);
+    @ParameterizedTest
+    @MethodSource("invalidUpdateCourseRequests")
+    void updateCourse_withInvalidBody_shouldReturn400(UpdateCourseRequest request) {
 
         ResponseEntity<Void> response = restTemplate.exchange(
                 "/api/courses/{id}",
@@ -133,22 +107,36 @@ public class PutCourseControllerTest {
                 Void.class,
                 88888L
         );
-
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
     }
 
-    @Test
-    void updateCourse_whenCourseNotExists_shouldReturn404() {
-        UpdateCourseRequest request = new UpdateCourseRequest(
-                "Spring Boot", "Kurs po Spring", teacherId);
+    static Stream<UpdateCourseRequest> invalidUpdateCourseRequests() {
+        return Stream.of(
+                new UpdateCourseRequest("", "Kurs po Spring", 99999L),
+                new UpdateCourseRequest("Spring Boot", "", 1L),
+                new UpdateCourseRequest("Spring Boot", "Kurs po Spring", null)
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource ("notFoundUpdateCourseArgs")
+    void updateCourse_whenNotExists_shouldReturn404(UpdateCourseRequest request, Long courseId) {
 
         ResponseEntity<Void> response = restTemplate.exchange(
                 "/api/courses/{id}",
                 HttpMethod.PUT,
                 new HttpEntity<>(request),
                 Void.class,
-                99999L
+                courseId
         );
+
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+    }
+
+    static Stream<Arguments> notFoundUpdateCourseArgs() {
+        return Stream.of(
+                Arguments.of(new UpdateCourseRequest("Spring", "Desc", 99999L), 88888L),
+                Arguments.of(new UpdateCourseRequest("Spring", "Desc", 1L), 99999L
+                ));
     }
 }

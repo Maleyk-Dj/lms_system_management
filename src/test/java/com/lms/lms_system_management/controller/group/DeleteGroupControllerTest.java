@@ -1,5 +1,6 @@
 package com.lms.lms_system_management.controller.group;
 
+import com.lms.lms_system_management.TestcontainersConfiguration;
 import com.lms.lms_system_management.dao.GroupRepository;
 import com.lms.lms_system_management.model.Group;
 import org.junit.jupiter.api.AfterEach;
@@ -13,13 +14,12 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.testcontainers.utility.TestcontainersConfiguration;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Import(TestcontainersConfiguration.class)
-public class DeleteGroupControllerTest {
+class DeleteGroupControllerTest {
 
     @Autowired
     private TestRestTemplate restTemplate;
@@ -42,6 +42,7 @@ public class DeleteGroupControllerTest {
     public void tearDown() {
         groupRepository.deleteAll();
     }
+
     @Test
     void deleteGroup_shouldReturn204AndRemoveFromDb() {
         ResponseEntity<Void> response = restTemplate.exchange(

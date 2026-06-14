@@ -1,5 +1,6 @@
 package com.lms.lms_system_management.controller.schedule;
 
+import com.lms.lms_system_management.TestcontainersConfiguration;
 import com.lms.lms_system_management.dao.CourseRepository;
 import com.lms.lms_system_management.dao.GroupRepository;
 import com.lms.lms_system_management.dao.ScheduleRepository;
@@ -13,21 +14,24 @@ import com.lms.lms_system_management.model.Teacher;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.testcontainers.utility.TestcontainersConfiguration;
 
 import java.time.LocalDateTime;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Import(TestcontainersConfiguration.class)
-public class PostScheduleControllerTest {
+class PostScheduleControllerTest {
+
     @Autowired
     private TestRestTemplate restTemplate;
 
@@ -42,8 +46,6 @@ public class PostScheduleControllerTest {
 
     private Long groupId;
     private Long courseId;
-    private Long scheduleId;
-    private LocalDateTime scheduleDate;
 
     @BeforeEach
     public void setUp() {
@@ -67,15 +69,14 @@ public class PostScheduleControllerTest {
         courseRepository.save(course);
         courseId = course.getId();
 
-        scheduleDate = LocalDateTime.of(2026, 7, 1, 10, 0);
+        LocalDateTime scheduleDate = LocalDateTime.of(2026, 7, 1, 10, 0);
 
         Schedule schedule = Schedule.builder()
                 .group(group)
                 .course(course)
-                .date(scheduleDate)
+                .dateClass(scheduleDate)
                 .build();
         scheduleRepository.save(schedule);
-        scheduleId = schedule.getId();
     }
 
     @AfterEach
@@ -85,6 +86,7 @@ public class PostScheduleControllerTest {
         groupRepository.deleteAll();
         teacherRepository.deleteAll();
     }
+
     @Test
     void assignCourseTime_shouldReturn201AndCorrectBody() {
         LocalDateTime newDate = LocalDateTime.of(2026, 8, 1, 9, 0);
@@ -107,10 +109,9 @@ public class PostScheduleControllerTest {
         assertThat(body.date()).isEqualTo(newDate);
     }
 
-    @Test
-    void assignCourseTime_whenGroupIdIsNull_shouldReturn400() {
-        NewScheduleRequest request = new NewScheduleRequest(null, courseId, scheduleDate);
-
+    @ParameterizedTest
+    @MethodSource("invalidScheduleRequests")
+    void assignCourseTime_whenIsNull_shouldReturn400(NewScheduleRequest request) {
         ResponseEntity<Void> response = restTemplate.postForEntity(
                 "/api/schedules",
                 request,
@@ -120,36 +121,17 @@ public class PostScheduleControllerTest {
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
     }
 
-    @Test
-    void assignCourseTime_whenCourseIdIsNull_shouldReturn400() {
-        NewScheduleRequest request = new NewScheduleRequest(groupId, null, scheduleDate);
-
-        ResponseEntity<Void> response = restTemplate.postForEntity(
-                "/api/schedules",
-                request,
-                Void.class
+    static Stream<NewScheduleRequest> invalidScheduleRequests() {
+        return Stream.of(
+                new NewScheduleRequest(null, 1L, LocalDateTime.now()),   // null groupId
+                new NewScheduleRequest(1L, null, LocalDateTime.now()),   // null courseId
+                new NewScheduleRequest(1L, 1L, null)
         );
-
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
     }
 
-    @Test
-    void assignCourseTime_whenDateIsNull_shouldReturn400() {
-        NewScheduleRequest request = new NewScheduleRequest(groupId, courseId, null);
-
-        ResponseEntity<Void> response = restTemplate.postForEntity(
-                "/api/schedules",
-                request,
-                Void.class
-        );
-
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
-    }
-
-    @Test
-    void assignCourseTime_whenGroupNotExists_shouldReturn404() {
-        NewScheduleRequest request = new NewScheduleRequest(99999L, courseId, scheduleDate);
-
+    @ParameterizedTest
+    @MethodSource("invalidSchedule")
+    void assignCourseTime_whenNotExists_shouldReturn404(NewScheduleRequest request) {
         ResponseEntity<Void> response = restTemplate.postForEntity(
                 "/api/schedules",
                 request,
@@ -159,16 +141,10 @@ public class PostScheduleControllerTest {
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
     }
 
-    @Test
-    void assignCourseTime_whenCourseNotExists_shouldReturn404() {
-        NewScheduleRequest request = new NewScheduleRequest(groupId, 99999L, scheduleDate);
-
-        ResponseEntity<Void> response = restTemplate.postForEntity(
-                "/api/schedules",
-                request,
-                Void.class
+    static Stream<NewScheduleRequest> invalidSchedule() {
+        return Stream.of(
+                new NewScheduleRequest(99999L, 1L, LocalDateTime.now()),
+                new NewScheduleRequest(1L, 99999L, LocalDateTime.now())
         );
-
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
     }
 }

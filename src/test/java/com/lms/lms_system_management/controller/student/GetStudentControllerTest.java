@@ -1,5 +1,6 @@
 package com.lms.lms_system_management.controller.student;
 
+import com.lms.lms_system_management.TestcontainersConfiguration;
 import com.lms.lms_system_management.dao.GroupRepository;
 import com.lms.lms_system_management.dao.StudentRepository;
 import com.lms.lms_system_management.dto.student.StudentResponse;
@@ -14,13 +15,12 @@ import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.testcontainers.utility.TestcontainersConfiguration;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Import(TestcontainersConfiguration.class)
-public class GetStudentControllerTest {
+class GetStudentControllerTest {
     @Autowired
     private TestRestTemplate restTemplate;
     @Autowired
@@ -30,7 +30,6 @@ public class GetStudentControllerTest {
 
     private Long studentId;
     private Long groupId;
-    private Long anotherGroupId;
 
     @BeforeEach
     public void setUp() {
@@ -44,7 +43,6 @@ public class GetStudentControllerTest {
                 name("Gruppa B")
                 .build();
         groupRepository.save(anotherGroup);
-        anotherGroupId = anotherGroup.getId();
 
         Student student = Student.builder()
                 .firstName("Valya")
@@ -97,5 +95,4 @@ public class GetStudentControllerTest {
         assertThat(body).isNotNull();
         assertThat(body.length).isGreaterThan(0);
     }
-
 }

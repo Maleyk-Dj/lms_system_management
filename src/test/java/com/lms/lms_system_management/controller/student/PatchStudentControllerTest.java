@@ -1,5 +1,6 @@
 package com.lms.lms_system_management.controller.student;
 
+import com.lms.lms_system_management.TestcontainersConfiguration;
 import com.lms.lms_system_management.dao.GroupRepository;
 import com.lms.lms_system_management.dao.StudentRepository;
 import com.lms.lms_system_management.dto.student.StudentResponse;
@@ -16,13 +17,13 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.testcontainers.utility.TestcontainersConfiguration;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Import(TestcontainersConfiguration.class)
-public class PatchStudentControllerTest {
+class PatchStudentControllerTest {
+
     @Autowired
     private TestRestTemplate restTemplate;
     @Autowired
@@ -62,6 +63,7 @@ public class PatchStudentControllerTest {
         studentRepository.deleteAll();
         groupRepository.deleteAll();
     }
+
     @Test
     void getStudentById_shouldReturn200AndCorrectBody() {
         ResponseEntity<StudentResponse> response = restTemplate.getForEntity(
@@ -99,6 +101,7 @@ public class PatchStudentControllerTest {
         assertThat(body).isNotNull();
         assertThat(body.length).isGreaterThan(0);
     }
+
     @Test
     void addToGroup_shouldReturn200AndUpdateGroupId() {
         ResponseEntity<StudentResponse> response = restTemplate.exchange(
@@ -129,7 +132,7 @@ public class PatchStudentControllerTest {
     }
 
     @Test
-    void addToGroup_whenStudentNotExists_shouldReturn404(){
+    void addToGroup_whenStudentNotExists_shouldReturn404() {
         ResponseEntity<Void> response = restTemplate.exchange(
                 "/api/students/{studentId}/groups/{groupId}",
                 HttpMethod.PATCH,

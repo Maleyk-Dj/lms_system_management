@@ -17,7 +17,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
-import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -48,7 +47,7 @@ class StudentServiceImplTest {
         Student saved = Student.builder().id(10L).firstName("Ivan").lastName("Petrov").group(group).build();
         StudentResponse expected = new StudentResponse(10L, "Ivan", "Petrov", 1L);
 
-        when(groupRepository.findById(1L)).thenReturn(Optional.of(group));
+        when(groupRepository.findByIdOrThrow(1L)).thenReturn(group);
         when(studentMapper.toEntity(request, group)).thenReturn(entity);
         when(studentRepository.save(entity)).thenReturn(saved);
         when(studentMapper.toResponse(saved)).thenReturn(expected);
@@ -62,7 +61,7 @@ class StudentServiceImplTest {
     @Test
     void create_whenGroupNotExists_shouldThrowNotFoundException() {
         NewStudentRequest request = new NewStudentRequest("Ivan", "Petrov", 99L);
-        when(groupRepository.findById(99L)).thenReturn(Optional.empty());
+        when(groupRepository.findByIdOrThrow(99L)).thenThrow(new NotFoundException("not found"));
 
         assertThatThrownBy(() -> studentServiceImpl.create(request))
                 .isInstanceOf(NotFoundException.class);
@@ -77,7 +76,7 @@ class StudentServiceImplTest {
         Student student = Student.builder().id(5L).firstName("Ivan").lastName("Petrov").group(group).build();
         StudentResponse expected = new StudentResponse(5L, "Ivan", "Petrov", 1L);
 
-        when(studentRepository.findById(5L)).thenReturn(Optional.of(student));
+        when(studentRepository.findByIdOrThrow(5L)).thenReturn(student);
         when(studentMapper.toResponse(student)).thenReturn(expected);
 
         StudentResponse result = studentServiceImpl.getById(5L);
@@ -87,7 +86,7 @@ class StudentServiceImplTest {
 
     @Test
     void getById_whenNotExists_shouldThrowNotFoundException() {
-        when(studentRepository.findById(99L)).thenReturn(Optional.empty());
+        when(studentRepository.findByIdOrThrow(99L)).thenThrow(new NotFoundException("not found"));
 
         assertThatThrownBy(() -> studentServiceImpl.getById(99L))
                 .isInstanceOf(NotFoundException.class);
@@ -129,7 +128,7 @@ class StudentServiceImplTest {
         Student saved = Student.builder().id(5L).firstName("Oleg").lastName("Olegov").group(group).build();
         StudentResponse expected = new StudentResponse(5L, "Oleg", "Olegov", 1L);
 
-        when(studentRepository.findById(5L)).thenReturn(Optional.of(student));
+        when(studentRepository.findByIdOrThrow(5L)).thenReturn(student);
         when(studentRepository.save(student)).thenReturn(saved);
         when(studentMapper.toResponse(saved)).thenReturn(expected);
 
@@ -137,7 +136,7 @@ class StudentServiceImplTest {
 
         assertThat(result).isEqualTo(expected);
         verify(studentMapper).updateStudent(request, student);
-        verify(groupRepository, never()).findById(any());
+        verify(groupRepository, never()).findByIdOrThrow(any());
     }
 
     @Test
@@ -149,8 +148,8 @@ class StudentServiceImplTest {
         Student saved = Student.builder().id(5L).firstName("Ivan").lastName("Petrov").group(newGroup).build();
         StudentResponse expected = new StudentResponse(5L, "Ivan", "Petrov", 2L);
 
-        when(studentRepository.findById(5L)).thenReturn(Optional.of(student));
-        when(groupRepository.findById(2L)).thenReturn(Optional.of(newGroup));
+        when(studentRepository.findByIdOrThrow(5L)).thenReturn(student);
+        when(groupRepository.findByIdOrThrow(2L)).thenReturn(newGroup);
         when(studentRepository.save(student)).thenReturn(saved);
         when(studentMapper.toResponse(saved)).thenReturn(expected);
 
@@ -162,7 +161,7 @@ class StudentServiceImplTest {
     @Test
     void update_whenStudentNotExists_shouldThrowNotFoundException() {
         UpdateStudentRequest request = new UpdateStudentRequest("Oleg", "Olegov", null);
-        when(studentRepository.findById(99L)).thenReturn(Optional.empty());
+        when(studentRepository.findByIdOrThrow(99L)).thenThrow(new NotFoundException("not found"));
 
         assertThatThrownBy(() -> studentServiceImpl.update(request, 99L))
                 .isInstanceOf(NotFoundException.class);
@@ -175,8 +174,8 @@ class StudentServiceImplTest {
         Student student = Student.builder().id(5L).group(group).build();
         UpdateStudentRequest request = new UpdateStudentRequest(null, null, 99L);
 
-        when(studentRepository.findById(5L)).thenReturn(Optional.of(student));
-        when(groupRepository.findById(99L)).thenReturn(Optional.empty());
+        when(studentRepository.findByIdOrThrow(5L)).thenReturn(student);
+        when(groupRepository.findByIdOrThrow(99L)).thenThrow(new NotFoundException("not found"));
 
         assertThatThrownBy(() -> studentServiceImpl.update(request, 5L))
                 .isInstanceOf(NotFoundException.class);
@@ -188,7 +187,7 @@ class StudentServiceImplTest {
     @Test
     void deleteById_whenExists_shouldDelete() {
         Student student = Student.builder().id(5L).build();
-        when(studentRepository.findById(5L)).thenReturn(Optional.of(student));
+        when(studentRepository.findByIdOrThrow(5L)).thenReturn(student);
 
         studentServiceImpl.deleteById(5L);
 
@@ -197,7 +196,7 @@ class StudentServiceImplTest {
 
     @Test
     void deleteById_whenNotExists_shouldThrowNotFoundException() {
-        when(studentRepository.findById(99L)).thenReturn(Optional.empty());
+        when(studentRepository.findByIdOrThrow(99L)).thenThrow(new NotFoundException("not found"));
 
         assertThatThrownBy(() -> studentServiceImpl.deleteById(99L))
                 .isInstanceOf(NotFoundException.class);
@@ -214,8 +213,8 @@ class StudentServiceImplTest {
         Student saved = Student.builder().id(5L).firstName("Ivan").lastName("Petrov").group(newGroup).build();
         StudentResponse expected = new StudentResponse(5L, "Ivan", "Petrov", 2L);
 
-        when(studentRepository.findById(5L)).thenReturn(Optional.of(student));
-        when(groupRepository.findById(2L)).thenReturn(Optional.of(newGroup));
+        when(studentRepository.findByIdOrThrow(5L)).thenReturn(student);
+        when(groupRepository.findByIdOrThrow(2L)).thenReturn(newGroup);
         when(studentRepository.save(student)).thenReturn(saved);
         when(studentMapper.toResponse(saved)).thenReturn(expected);
 
@@ -229,8 +228,8 @@ class StudentServiceImplTest {
         Group group = Group.builder().id(1L).build();
         Student student = Student.builder().id(5L).group(group).build();
 
-        when(studentRepository.findById(5L)).thenReturn(Optional.of(student));
-        when(groupRepository.findById(1L)).thenReturn(Optional.of(group));
+        when(studentRepository.findByIdOrThrow(5L)).thenReturn(student);
+        when(groupRepository.findByIdOrThrow(1L)).thenReturn(group);
 
         assertThatThrownBy(() -> studentServiceImpl.addToGroup(5L, 1L))
                 .isInstanceOf(AlreadyExistsException.class);
@@ -239,7 +238,7 @@ class StudentServiceImplTest {
 
     @Test
     void addToGroup_whenStudentNotExists_shouldThrowNotFoundException() {
-        when(studentRepository.findById(99L)).thenReturn(Optional.empty());
+        when(studentRepository.findByIdOrThrow(99L)).thenThrow(new NotFoundException("not found"));
 
         assertThatThrownBy(() -> studentServiceImpl.addToGroup(99L, 1L))
                 .isInstanceOf(NotFoundException.class);
@@ -248,8 +247,8 @@ class StudentServiceImplTest {
     @Test
     void addToGroup_whenGroupNotExists_shouldThrowNotFoundException() {
         Student student = Student.builder().id(5L).group(Group.builder().id(1L).build()).build();
-        when(studentRepository.findById(5L)).thenReturn(Optional.of(student));
-        when(groupRepository.findById(99L)).thenReturn(Optional.empty());
+        when(studentRepository.findByIdOrThrow(5L)).thenReturn(student);
+        when(groupRepository.findByIdOrThrow(99L)).thenThrow(new NotFoundException("not found"));
 
         assertThatThrownBy(() -> studentServiceImpl.addToGroup(5L, 99L))
                 .isInstanceOf(NotFoundException.class);
