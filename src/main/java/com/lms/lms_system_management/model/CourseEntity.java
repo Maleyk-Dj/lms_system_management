@@ -11,7 +11,7 @@ import lombok.*;
 @NoArgsConstructor
 @ToString
 @Builder
-public class Course {
+public class CourseEntity {
 
     @Id
     @GeneratedValue (strategy = GenerationType.IDENTITY)
@@ -25,5 +25,5 @@ public class Course {
 
     @ManyToOne (optional = false)
     @JoinColumn (name = "teacher_id", nullable = false)
-    private Teacher teacher;
+    private TeacherEntity teacherEntity;
 }

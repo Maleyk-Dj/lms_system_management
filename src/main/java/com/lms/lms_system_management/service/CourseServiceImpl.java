@@ -6,8 +6,8 @@ import com.lms.lms_system_management.dto.course.NewCourseRequest;
 import com.lms.lms_system_management.dto.course.UpdateCourseRequest;
 import com.lms.lms_system_management.dto.course.CourseResponse;
 import com.lms.lms_system_management.mapper.CourseMapper;
-import com.lms.lms_system_management.model.Course;
-import com.lms.lms_system_management.model.Teacher;
+import com.lms.lms_system_management.model.CourseEntity;
+import com.lms.lms_system_management.model.TeacherEntity;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -28,9 +28,9 @@ public class CourseServiceImpl implements CourseService {
     public CourseResponse create(NewCourseRequest newCourseRequest) {
 
         Long teacherId = newCourseRequest.teacherId();
-        Teacher teacher = teacherRepository.findByIdOrThrow(teacherId);
-        Course course = courseMapper.toEntity(newCourseRequest, teacher);
-        Course saved = courseRepository.save(course);
+        TeacherEntity teacherEntity = teacherRepository.findByIdOrThrow(teacherId);
+        CourseEntity courseEntity = courseMapper.toEntity(newCourseRequest, teacherEntity);
+        CourseEntity saved = courseRepository.save(courseEntity);
         return courseMapper.toResponse(saved);
     }
 
@@ -38,7 +38,7 @@ public class CourseServiceImpl implements CourseService {
     @Override
     public CourseResponse findById(Long id) {
 
-        Course findable = courseRepository.findByIdOrThrow(id);
+        CourseEntity findable = courseRepository.findByIdOrThrow(id);
         return courseMapper.toResponse(findable);
     }
 
@@ -56,11 +56,11 @@ public class CourseServiceImpl implements CourseService {
     @Override
     public CourseResponse update(UpdateCourseRequest updateCourseRequest, Long id) {
 
-        Course course = courseRepository.findByIdOrThrow(id);
+        CourseEntity courseEntity = courseRepository.findByIdOrThrow(id);
         Long teacherId = updateCourseRequest.teacherId();
-        Teacher teacher = teacherRepository.findByIdOrThrow(teacherId);
-        courseMapper.updateEntity(updateCourseRequest, teacher, course);
-        Course updated = courseRepository.save(course);
+        TeacherEntity teacherEntity = teacherRepository.findByIdOrThrow(teacherId);
+        courseMapper.updateEntity(updateCourseRequest, teacherEntity, courseEntity);
+        CourseEntity updated = courseRepository.save(courseEntity);
         return courseMapper.toResponse(updated);
     }
 
@@ -68,7 +68,7 @@ public class CourseServiceImpl implements CourseService {
     @Override
     public void delete(Long id) {
 
-        Course deleted = courseRepository.findByIdOrThrow(id);
+        CourseEntity deleted = courseRepository.findByIdOrThrow(id);
         courseRepository.delete(deleted);
     }
 }

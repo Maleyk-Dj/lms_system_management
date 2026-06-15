@@ -5,7 +5,7 @@ import com.lms.lms_system_management.dto.group.NewGroupRequest;
 import com.lms.lms_system_management.dto.group.UpdateGroupRequest;
 import com.lms.lms_system_management.dto.group.GroupResponse;
 import com.lms.lms_system_management.mapper.GroupMapper;
-import com.lms.lms_system_management.model.Group;
+import com.lms.lms_system_management.model.GroupEntity;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -24,14 +24,14 @@ public class GroupServiceImpl implements GroupService {
     @Override
     public GroupResponse create(NewGroupRequest newGroup) {
 
-        Group saved = groupRepository.save(groupMapper.toEntity(newGroup));
+        GroupEntity saved = groupRepository.save(groupMapper.toEntity(newGroup));
         return groupMapper.toResponse(saved);
     }
 
     @Override
     public GroupResponse findById(Long id) {
 
-        Group groupEntity = groupRepository.findByIdOrThrow(id);
+        GroupEntity groupEntity = groupRepository.findByIdOrThrow(id);
         return groupMapper.toResponse(groupEntity);
     }
 
@@ -49,9 +49,9 @@ public class GroupServiceImpl implements GroupService {
     @Override
     public GroupResponse update(UpdateGroupRequest updateGroupRequest, Long id) {
 
-        Group updated = groupRepository.findByIdOrThrow(id);
+        GroupEntity updated = groupRepository.findByIdOrThrow(id);
         groupMapper.updateGroup(updateGroupRequest, updated);
-        Group saved = groupRepository.save(updated);
+        GroupEntity saved = groupRepository.save(updated);
         return groupMapper.toResponse(saved);
     }
 
@@ -59,7 +59,7 @@ public class GroupServiceImpl implements GroupService {
     @Override
     public void deleteById(Long id) {
 
-        Group deleted = groupRepository.findByIdOrThrow(id);
+        GroupEntity deleted = groupRepository.findByIdOrThrow(id);
         groupRepository.delete(deleted);
     }
 }

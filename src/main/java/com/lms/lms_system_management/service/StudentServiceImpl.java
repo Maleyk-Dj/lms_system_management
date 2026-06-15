@@ -7,8 +7,8 @@ import com.lms.lms_system_management.dto.student.UpdateStudentRequest;
 import com.lms.lms_system_management.dto.student.StudentResponse;
 import com.lms.lms_system_management.exception.AlreadyExistsException;
 import com.lms.lms_system_management.mapper.StudentMapper;
-import com.lms.lms_system_management.model.Group;
-import com.lms.lms_system_management.model.Student;
+import com.lms.lms_system_management.model.GroupEntity;
+import com.lms.lms_system_management.model.StudentEntity;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -28,16 +28,16 @@ public class StudentServiceImpl implements StudentService {
     @Override
     public StudentResponse create(NewStudentRequest newStudentRequest) {
 
-        Group group = groupRepository.findByIdOrThrow(newStudentRequest.groupId());
-        Student student = studentMapper.toEntity(newStudentRequest, group);
-        return studentMapper.toResponse(studentRepository.save(student));
+        GroupEntity groupEntity = groupRepository.findByIdOrThrow(newStudentRequest.groupId());
+        StudentEntity studentEntity = studentMapper.toEntity(newStudentRequest, groupEntity);
+        return studentMapper.toResponse(studentRepository.save(studentEntity));
     }
 
     @Override
     public StudentResponse getById(Long id) {
 
-        Student student = studentRepository.findByIdOrThrow(id);
-        return studentMapper.toResponse(student);
+        StudentEntity studentEntity = studentRepository.findByIdOrThrow(id);
+        return studentMapper.toResponse(studentEntity);
     }
 
     @Transactional(readOnly = true)
@@ -54,20 +54,20 @@ public class StudentServiceImpl implements StudentService {
     @Override
     public StudentResponse update(UpdateStudentRequest request, Long id) {
 
-        Student student = studentRepository.findByIdOrThrow(id);
-        studentMapper.updateStudent(request, student);
+        StudentEntity studentEntity = studentRepository.findByIdOrThrow(id);
+        studentMapper.updateStudent(request, studentEntity);
         if (request.groupId() != null) {
-            Group group = groupRepository.findByIdOrThrow(request.groupId());
-            student.setGroup(group);
+            GroupEntity groupEntity = groupRepository.findByIdOrThrow(request.groupId());
+            studentEntity.setGroupEntity(groupEntity);
         }
-        return studentMapper.toResponse(studentRepository.save(student));
+        return studentMapper.toResponse(studentRepository.save(studentEntity));
     }
 
     @Transactional
     @Override
     public void deleteById(Long id) {
 
-        Student deleted = studentRepository.findByIdOrThrow(id);
+        StudentEntity deleted = studentRepository.findByIdOrThrow(id);
         studentRepository.delete(deleted);
     }
 
@@ -75,14 +75,14 @@ public class StudentServiceImpl implements StudentService {
     @Override
     public StudentResponse addToGroup(Long studentId, Long groupId) {
 
-        Student student = studentRepository.findByIdOrThrow(studentId);
+        StudentEntity studentEntity = studentRepository.findByIdOrThrow(studentId);
 
-        Group group = groupRepository.findByIdOrThrow(groupId);
+        GroupEntity groupEntity = groupRepository.findByIdOrThrow(groupId);
 
-        if (student.getGroup() != null && student.getGroup().getId().equals(groupId)) {
+        if (studentEntity.getGroupEntity() != null && studentEntity.getGroupEntity().getId().equals(groupId)) {
             throw new AlreadyExistsException("Студент существует в группе");
         }
-        student.setGroup(group);
-        return studentMapper.toResponse(studentRepository.save(student));
+        studentEntity.setGroupEntity(groupEntity);
+        return studentMapper.toResponse(studentRepository.save(studentEntity));
     }
 }

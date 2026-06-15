@@ -3,8 +3,6 @@ package com.lms.lms_system_management.model;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.util.List;
-
 @Entity
 @Table (name = "groups")
 @Getter
@@ -13,7 +11,7 @@ import java.util.List;
 @NoArgsConstructor
 @Builder
 @ToString
-public class Group {
+public class GroupEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

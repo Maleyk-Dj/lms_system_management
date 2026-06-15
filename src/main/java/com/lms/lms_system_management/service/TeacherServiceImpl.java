@@ -8,7 +8,7 @@ import com.lms.lms_system_management.dto.schedule.ScheduleResponse;
 import com.lms.lms_system_management.dto.teacher.TeacherResponse;
 import com.lms.lms_system_management.mapper.ScheduleMapper;
 import com.lms.lms_system_management.mapper.TeacherMapper;
-import com.lms.lms_system_management.model.Teacher;
+import com.lms.lms_system_management.model.TeacherEntity;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -29,14 +29,14 @@ public class TeacherServiceImpl implements TeacherService {
     @Override
     public TeacherResponse create(NewTeacherRequest teacher) {
 
-        Teacher saved = teacherRepository.save(teacherMapper.toEntity(teacher));
+        TeacherEntity saved = teacherRepository.save(teacherMapper.toEntity(teacher));
         return teacherMapper.toResponse(saved);
     }
 
     @Override
     public TeacherResponse getById(Long id) {
 
-        Teacher teacherEntity = teacherRepository.findByIdOrThrow(id);
+        TeacherEntity teacherEntity = teacherRepository.findByIdOrThrow(id);
         return teacherMapper.toResponse(teacherEntity);
     }
 
@@ -54,9 +54,9 @@ public class TeacherServiceImpl implements TeacherService {
     @Override
     public TeacherResponse update(UpdateTeacherRequest teacher, Long id) {
 
-        Teacher updated = teacherRepository.findByIdOrThrow(id);
+        TeacherEntity updated = teacherRepository.findByIdOrThrow(id);
         teacherMapper.updateEntity(teacher, updated);
-        Teacher saved = teacherRepository.save(updated);
+        TeacherEntity saved = teacherRepository.save(updated);
         return teacherMapper.toResponse(saved);
     }
 
@@ -64,7 +64,7 @@ public class TeacherServiceImpl implements TeacherService {
     @Override
     public void deleteById(Long id) {
 
-        Teacher deleted = teacherRepository.findByIdOrThrow(id);
+        TeacherEntity deleted = teacherRepository.findByIdOrThrow(id);
         teacherRepository.delete(deleted);
 
     }

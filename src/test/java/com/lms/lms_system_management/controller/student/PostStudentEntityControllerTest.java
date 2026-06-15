@@ -5,8 +5,8 @@ import com.lms.lms_system_management.dao.GroupRepository;
 import com.lms.lms_system_management.dao.StudentRepository;
 import com.lms.lms_system_management.dto.student.NewStudentRequest;
 import com.lms.lms_system_management.dto.student.StudentResponse;
-import com.lms.lms_system_management.model.Group;
-import com.lms.lms_system_management.model.Student;
+import com.lms.lms_system_management.model.GroupEntity;
+import com.lms.lms_system_management.model.StudentEntity;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -25,7 +25,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Import(TestcontainersConfiguration.class)
-class PostStudentControllerTest {
+class PostStudentEntityControllerTest {
 
     @Autowired
     private TestRestTemplate restTemplate;
@@ -38,23 +38,23 @@ class PostStudentControllerTest {
 
     @BeforeEach
     public void setUp() {
-        Group group = Group.builder().
+        GroupEntity groupEntity = GroupEntity.builder().
                 name("Gruppa A")
                 .build();
-        groupRepository.save(group);
-        groupId = group.getId();
+        groupRepository.save(groupEntity);
+        groupId = groupEntity.getId();
 
-        Group anotherGroup = Group.builder().
+        GroupEntity anotherGroupEntity = GroupEntity.builder().
                 name("Gruppa B")
                 .build();
-        groupRepository.save(anotherGroup);
+        groupRepository.save(anotherGroupEntity);
 
-        Student student = Student.builder()
+        StudentEntity studentEntity = StudentEntity.builder()
                 .firstName("Valya")
                 .lastName("Ivanova")
-                .group(group)
+                .groupEntity(groupEntity)
                 .build();
-        studentRepository.save(student);
+        studentRepository.save(studentEntity);
     }
 
     @AfterEach

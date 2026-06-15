@@ -1,14 +1,14 @@
 package com.lms.lms_system_management.dao;
 
 import com.lms.lms_system_management.exception.NotFoundException;
-import com.lms.lms_system_management.model.Teacher;
+import com.lms.lms_system_management.model.TeacherEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface TeacherRepository extends JpaRepository<Teacher, Long> {
+public interface TeacherRepository extends JpaRepository<TeacherEntity, Long> {
 
-    default Teacher findByIdOrThrow(Long id) {
+    default TeacherEntity findByIdOrThrow(Long id) {
         return findById(id)
                 .orElseThrow(() -> new NotFoundException("Учитель с id " + id + " не найден"));
     }

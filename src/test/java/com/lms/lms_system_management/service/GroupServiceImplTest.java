@@ -6,7 +6,7 @@ import com.lms.lms_system_management.dto.group.UpdateGroupRequest;
 import com.lms.lms_system_management.dto.group.GroupResponse;
 import com.lms.lms_system_management.exception.NotFoundException;
 import com.lms.lms_system_management.mapper.GroupMapper;
-import com.lms.lms_system_management.model.Group;
+import com.lms.lms_system_management.model.GroupEntity;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -36,8 +36,8 @@ public class GroupServiceImplTest {
     @Test
     void create_shouldSaveAndReturnResponse() {
         NewGroupRequest request = new NewGroupRequest("Gruppa A");
-        Group entity = Group.builder().name("Gruppa A").build();
-        Group saved = Group.builder().id(1L).name("Gruppa A").build();
+        GroupEntity entity = GroupEntity.builder().name("Gruppa A").build();
+        GroupEntity saved = GroupEntity.builder().id(1L).name("Gruppa A").build();
         GroupResponse expected = new GroupResponse(1L, "Gruppa A");
 
         when(groupMapper.toEntity(request)).thenReturn(entity);
@@ -54,11 +54,11 @@ public class GroupServiceImplTest {
 
     @Test
     void findById_whenExists_shouldReturnResponse() {
-        Group group = Group.builder().id(1L).name("Gruppa A").build();
+        GroupEntity groupEntity = GroupEntity.builder().id(1L).name("Gruppa A").build();
         GroupResponse expected = new GroupResponse(1L, "Gruppa A");
 
-        when(groupRepository.findByIdOrThrow(1L)).thenReturn(group);
-        when(groupMapper.toResponse(group)).thenReturn(expected);
+        when(groupRepository.findByIdOrThrow(1L)).thenReturn(groupEntity);
+        when(groupMapper.toResponse(groupEntity)).thenReturn(expected);
 
         GroupResponse result = groupService.findById(1L);
 
@@ -77,8 +77,8 @@ public class GroupServiceImplTest {
 
     @Test
     void findAll_shouldReturnListOfResponses() {
-        Group g1 = Group.builder().id(1L).name("Gruppa A").build();
-        Group g2 = Group.builder().id(2L).name("Gruppa B").build();
+        GroupEntity g1 = GroupEntity.builder().id(1L).name("Gruppa A").build();
+        GroupEntity g2 = GroupEntity.builder().id(2L).name("Gruppa B").build();
         GroupResponse r1 = new GroupResponse(1L, "Gruppa A");
         GroupResponse r2 = new GroupResponse(2L, "Gruppa B");
 
@@ -103,18 +103,18 @@ public class GroupServiceImplTest {
     @Test
     void update_whenExists_shouldUpdateAndReturnResponse() {
         UpdateGroupRequest request = new UpdateGroupRequest("Gruppa C");
-        Group group = Group.builder().id(1L).name("Gruppa A").build();
-        Group saved = Group.builder().id(1L).name("Gruppa C").build();
+        GroupEntity groupEntity = GroupEntity.builder().id(1L).name("Gruppa A").build();
+        GroupEntity saved = GroupEntity.builder().id(1L).name("Gruppa C").build();
         GroupResponse expected = new GroupResponse(1L, "Gruppa C");
 
-        when(groupRepository.findByIdOrThrow(1L)).thenReturn(group);
-        when(groupRepository.save(group)).thenReturn(saved);
+        when(groupRepository.findByIdOrThrow(1L)).thenReturn(groupEntity);
+        when(groupRepository.save(groupEntity)).thenReturn(saved);
         when(groupMapper.toResponse(saved)).thenReturn(expected);
 
         GroupResponse result = groupService.update(request, 1L);
 
         assertThat(result).isEqualTo(expected);
-        verify(groupMapper).updateGroup(request, group);
+        verify(groupMapper).updateGroup(request, groupEntity);
     }
 
     @Test
@@ -131,12 +131,12 @@ public class GroupServiceImplTest {
 
     @Test
     void deleteById_whenExists_shouldDelete() {
-        Group group = Group.builder().id(1L).name("Gruppa A").build();
-        when(groupRepository.findByIdOrThrow(1L)).thenReturn(group);
+        GroupEntity groupEntity = GroupEntity.builder().id(1L).name("Gruppa A").build();
+        when(groupRepository.findByIdOrThrow(1L)).thenReturn(groupEntity);
 
         groupService.deleteById(1L);
 
-        verify(groupRepository).delete(group);
+        verify(groupRepository).delete(groupEntity);
     }
 
     @Test

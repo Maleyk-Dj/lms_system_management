@@ -2,7 +2,9 @@ package com.lms.lms_system_management.controller.teacher;
 
 import com.lms.lms_system_management.TestcontainersConfiguration;
 import com.lms.lms_system_management.dao.TeacherRepository;
-import com.lms.lms_system_management.model.Teacher;
+import com.lms.lms_system_management.dto.teacher.UpdateTeacherRequest;
+import com.lms.lms_system_management.dto.teacher.TeacherResponse;
+import com.lms.lms_system_management.model.TeacherEntity;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -19,7 +21,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Import(TestcontainersConfiguration.class)
-class DeleteTeacherControllerTest {
+class PatchTeacherEntityControllerTest {
 
     @Autowired
     private TestRestTemplate testRestTemplate;
@@ -31,38 +33,64 @@ class DeleteTeacherControllerTest {
 
     @BeforeEach
     public void setup() {
-        Teacher teacher = Teacher.builder()
+        TeacherEntity teacherEntity = TeacherEntity.builder()
                 .firstName("Malika")
                 .lastName("Djabrailova")
                 .build();
-        teacherRepository.save(teacher);
-        teacherId = teacher.getId();
+        teacherRepository.save(teacherEntity);
+        teacherId = teacherEntity.getId();
     }
 
     @AfterEach
     public void tearDown() {
         teacherRepository.deleteAll();
     }
+
     @Test
-    void deleteTeacher_shouldReturn204AndRemoveFromDb() {
+    void updateTeacher_shouldReturn200AndUpdatedBody() {
+        UpdateTeacherRequest request = new UpdateTeacherRequest("Anna", "Ivanova");
+
+        ResponseEntity<TeacherResponse> response = testRestTemplate.exchange(
+                "/api/teachers/{id}",
+                HttpMethod.PATCH,
+                new HttpEntity<>(request),
+                TeacherResponse.class,
+                teacherId
+        );
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+        TeacherResponse body = response.getBody();
+
+        assertThat(body).isNotNull();
+        assertThat(body.id()).isEqualTo(teacherId);
+        assertThat(body.firstName()).isEqualTo("Anna");
+        assertThat(body.lastName()).isEqualTo("Ivanova");
+    }
+
+    @Test
+    void updateTeacher_whenFirstNameIsBlank_shouldReturn400() {
+        UpdateTeacherRequest request = new UpdateTeacherRequest("", "Ivanova");
+
         ResponseEntity<Void> response = testRestTemplate.exchange(
                 "/api/teachers/{id}",
-                HttpMethod.DELETE,
-                HttpEntity.EMPTY,
+                HttpMethod.PATCH,
+                new HttpEntity<>(request),
                 Void.class,
                 teacherId
         );
 
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
-        assertThat(teacherRepository.findById(teacherId)).isEmpty();
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
     }
 
     @Test
-    void deleteTeacher_whenNotExists_shouldReturn404() {
+    void updateTeacher_whenNotExists_shouldReturn404() {
+        UpdateTeacherRequest request = new UpdateTeacherRequest("Anna", "Ivanova");
+
         ResponseEntity<Void> response = testRestTemplate.exchange(
                 "/api/teachers/{id}",
-                HttpMethod.DELETE,
-                HttpEntity.EMPTY,
+                HttpMethod.PATCH,
+                new HttpEntity<>(request),
                 Void.class,
                 99999L
         );

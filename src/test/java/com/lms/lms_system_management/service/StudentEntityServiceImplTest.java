@@ -8,8 +8,8 @@ import com.lms.lms_system_management.dto.student.StudentResponse;
 import com.lms.lms_system_management.exception.AlreadyExistsException;
 import com.lms.lms_system_management.exception.NotFoundException;
 import com.lms.lms_system_management.mapper.StudentMapper;
-import com.lms.lms_system_management.model.Group;
-import com.lms.lms_system_management.model.Student;
+import com.lms.lms_system_management.model.GroupEntity;
+import com.lms.lms_system_management.model.StudentEntity;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -23,7 +23,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class StudentServiceImplTest {
+class StudentEntityServiceImplTest {
 
     @Mock
     private StudentRepository studentRepository;
@@ -41,14 +41,14 @@ class StudentServiceImplTest {
 
     @Test
     void create_whenGroupExists_shouldSaveAndReturnResponse() {
-        Group group = Group.builder().id(1L).name("Gruppa A").build();
+        GroupEntity groupEntity = GroupEntity.builder().id(1L).name("Gruppa A").build();
         NewStudentRequest request = new NewStudentRequest("Ivan", "Petrov", 1L);
-        Student entity = Student.builder().firstName("Ivan").lastName("Petrov").group(group).build();
-        Student saved = Student.builder().id(10L).firstName("Ivan").lastName("Petrov").group(group).build();
+        StudentEntity entity = StudentEntity.builder().firstName("Ivan").lastName("Petrov").groupEntity(groupEntity).build();
+        StudentEntity saved = StudentEntity.builder().id(10L).firstName("Ivan").lastName("Petrov").groupEntity(groupEntity).build();
         StudentResponse expected = new StudentResponse(10L, "Ivan", "Petrov", 1L);
 
-        when(groupRepository.findByIdOrThrow(1L)).thenReturn(group);
-        when(studentMapper.toEntity(request, group)).thenReturn(entity);
+        when(groupRepository.findByIdOrThrow(1L)).thenReturn(groupEntity);
+        when(studentMapper.toEntity(request, groupEntity)).thenReturn(entity);
         when(studentRepository.save(entity)).thenReturn(saved);
         when(studentMapper.toResponse(saved)).thenReturn(expected);
 
@@ -72,12 +72,12 @@ class StudentServiceImplTest {
 
     @Test
     void getById_whenExists_shouldReturnResponse() {
-        Group group = Group.builder().id(1L).build();
-        Student student = Student.builder().id(5L).firstName("Ivan").lastName("Petrov").group(group).build();
+        GroupEntity groupEntity = GroupEntity.builder().id(1L).build();
+        StudentEntity studentEntity = StudentEntity.builder().id(5L).firstName("Ivan").lastName("Petrov").groupEntity(groupEntity).build();
         StudentResponse expected = new StudentResponse(5L, "Ivan", "Petrov", 1L);
 
-        when(studentRepository.findByIdOrThrow(5L)).thenReturn(student);
-        when(studentMapper.toResponse(student)).thenReturn(expected);
+        when(studentRepository.findByIdOrThrow(5L)).thenReturn(studentEntity);
+        when(studentMapper.toResponse(studentEntity)).thenReturn(expected);
 
         StudentResponse result = studentServiceImpl.getById(5L);
 
@@ -96,9 +96,9 @@ class StudentServiceImplTest {
 
     @Test
     void getAll_shouldReturnListOfResponses() {
-        Group group = Group.builder().id(1L).build();
-        Student s1 = Student.builder().id(1L).firstName("Ivan").lastName("Petrov").group(group).build();
-        Student s2 = Student.builder().id(2L).firstName("Anna").lastName("Ivanova").group(group).build();
+        GroupEntity groupEntity = GroupEntity.builder().id(1L).build();
+        StudentEntity s1 = StudentEntity.builder().id(1L).firstName("Ivan").lastName("Petrov").groupEntity(groupEntity).build();
+        StudentEntity s2 = StudentEntity.builder().id(2L).firstName("Anna").lastName("Ivanova").groupEntity(groupEntity).build();
         StudentResponse r1 = new StudentResponse(1L, "Ivan", "Petrov", 1L);
         StudentResponse r2 = new StudentResponse(2L, "Anna", "Ivanova", 1L);
 
@@ -122,35 +122,35 @@ class StudentServiceImplTest {
 
     @Test
     void update_withoutGroupChange_shouldUpdateAndReturnResponse() {
-        Group group = Group.builder().id(1L).build();
-        Student student = Student.builder().id(5L).firstName("Ivan").lastName("Petrov").group(group).build();
+        GroupEntity groupEntity = GroupEntity.builder().id(1L).build();
+        StudentEntity studentEntity = StudentEntity.builder().id(5L).firstName("Ivan").lastName("Petrov").groupEntity(groupEntity).build();
         UpdateStudentRequest request = new UpdateStudentRequest("Oleg", "Olegov", null);
-        Student saved = Student.builder().id(5L).firstName("Oleg").lastName("Olegov").group(group).build();
+        StudentEntity saved = StudentEntity.builder().id(5L).firstName("Oleg").lastName("Olegov").groupEntity(groupEntity).build();
         StudentResponse expected = new StudentResponse(5L, "Oleg", "Olegov", 1L);
 
-        when(studentRepository.findByIdOrThrow(5L)).thenReturn(student);
-        when(studentRepository.save(student)).thenReturn(saved);
+        when(studentRepository.findByIdOrThrow(5L)).thenReturn(studentEntity);
+        when(studentRepository.save(studentEntity)).thenReturn(saved);
         when(studentMapper.toResponse(saved)).thenReturn(expected);
 
         StudentResponse result = studentServiceImpl.update(request, 5L);
 
         assertThat(result).isEqualTo(expected);
-        verify(studentMapper).updateStudent(request, student);
+        verify(studentMapper).updateStudent(request, studentEntity);
         verify(groupRepository, never()).findByIdOrThrow(any());
     }
 
     @Test
     void update_withGroupChange_shouldUpdateGroupAndReturnResponse() {
-        Group oldGroup = Group.builder().id(1L).build();
-        Group newGroup = Group.builder().id(2L).build();
-        Student student = Student.builder().id(5L).firstName("Ivan").lastName("Petrov").group(oldGroup).build();
+        GroupEntity oldGroupEntity = GroupEntity.builder().id(1L).build();
+        GroupEntity newGroupEntity = GroupEntity.builder().id(2L).build();
+        StudentEntity studentEntity = StudentEntity.builder().id(5L).firstName("Ivan").lastName("Petrov").groupEntity(oldGroupEntity).build();
         UpdateStudentRequest request = new UpdateStudentRequest(null, null, 2L);
-        Student saved = Student.builder().id(5L).firstName("Ivan").lastName("Petrov").group(newGroup).build();
+        StudentEntity saved = StudentEntity.builder().id(5L).firstName("Ivan").lastName("Petrov").groupEntity(newGroupEntity).build();
         StudentResponse expected = new StudentResponse(5L, "Ivan", "Petrov", 2L);
 
-        when(studentRepository.findByIdOrThrow(5L)).thenReturn(student);
-        when(groupRepository.findByIdOrThrow(2L)).thenReturn(newGroup);
-        when(studentRepository.save(student)).thenReturn(saved);
+        when(studentRepository.findByIdOrThrow(5L)).thenReturn(studentEntity);
+        when(groupRepository.findByIdOrThrow(2L)).thenReturn(newGroupEntity);
+        when(studentRepository.save(studentEntity)).thenReturn(saved);
         when(studentMapper.toResponse(saved)).thenReturn(expected);
 
         StudentResponse result = studentServiceImpl.update(request, 5L);
@@ -170,11 +170,11 @@ class StudentServiceImplTest {
 
     @Test
     void update_whenNewGroupNotExists_shouldThrowNotFoundException() {
-        Group group = Group.builder().id(1L).build();
-        Student student = Student.builder().id(5L).group(group).build();
+        GroupEntity groupEntity = GroupEntity.builder().id(1L).build();
+        StudentEntity studentEntity = StudentEntity.builder().id(5L).groupEntity(groupEntity).build();
         UpdateStudentRequest request = new UpdateStudentRequest(null, null, 99L);
 
-        when(studentRepository.findByIdOrThrow(5L)).thenReturn(student);
+        when(studentRepository.findByIdOrThrow(5L)).thenReturn(studentEntity);
         when(groupRepository.findByIdOrThrow(99L)).thenThrow(new NotFoundException("not found"));
 
         assertThatThrownBy(() -> studentServiceImpl.update(request, 5L))
@@ -186,12 +186,12 @@ class StudentServiceImplTest {
 
     @Test
     void deleteById_whenExists_shouldDelete() {
-        Student student = Student.builder().id(5L).build();
-        when(studentRepository.findByIdOrThrow(5L)).thenReturn(student);
+        StudentEntity studentEntity = StudentEntity.builder().id(5L).build();
+        when(studentRepository.findByIdOrThrow(5L)).thenReturn(studentEntity);
 
         studentServiceImpl.deleteById(5L);
 
-        verify(studentRepository).delete(student);
+        verify(studentRepository).delete(studentEntity);
     }
 
     @Test
@@ -207,15 +207,15 @@ class StudentServiceImplTest {
 
     @Test
     void addToGroup_whenValid_shouldUpdateGroupAndReturnResponse() {
-        Group oldGroup = Group.builder().id(1L).build();
-        Group newGroup = Group.builder().id(2L).build();
-        Student student = Student.builder().id(5L).firstName("Ivan").lastName("Petrov").group(oldGroup).build();
-        Student saved = Student.builder().id(5L).firstName("Ivan").lastName("Petrov").group(newGroup).build();
+        GroupEntity oldGroupEntity = GroupEntity.builder().id(1L).build();
+        GroupEntity newGroupEntity = GroupEntity.builder().id(2L).build();
+        StudentEntity studentEntity = StudentEntity.builder().id(5L).firstName("Ivan").lastName("Petrov").groupEntity(oldGroupEntity).build();
+        StudentEntity saved = StudentEntity.builder().id(5L).firstName("Ivan").lastName("Petrov").groupEntity(newGroupEntity).build();
         StudentResponse expected = new StudentResponse(5L, "Ivan", "Petrov", 2L);
 
-        when(studentRepository.findByIdOrThrow(5L)).thenReturn(student);
-        when(groupRepository.findByIdOrThrow(2L)).thenReturn(newGroup);
-        when(studentRepository.save(student)).thenReturn(saved);
+        when(studentRepository.findByIdOrThrow(5L)).thenReturn(studentEntity);
+        when(groupRepository.findByIdOrThrow(2L)).thenReturn(newGroupEntity);
+        when(studentRepository.save(studentEntity)).thenReturn(saved);
         when(studentMapper.toResponse(saved)).thenReturn(expected);
 
         StudentResponse result = studentServiceImpl.addToGroup(5L, 2L);
@@ -225,11 +225,11 @@ class StudentServiceImplTest {
 
     @Test
     void addToGroup_whenAlreadyInGroup_shouldThrowAlreadyExistsException() {
-        Group group = Group.builder().id(1L).build();
-        Student student = Student.builder().id(5L).group(group).build();
+        GroupEntity groupEntity = GroupEntity.builder().id(1L).build();
+        StudentEntity studentEntity = StudentEntity.builder().id(5L).groupEntity(groupEntity).build();
 
-        when(studentRepository.findByIdOrThrow(5L)).thenReturn(student);
-        when(groupRepository.findByIdOrThrow(1L)).thenReturn(group);
+        when(studentRepository.findByIdOrThrow(5L)).thenReturn(studentEntity);
+        when(groupRepository.findByIdOrThrow(1L)).thenReturn(groupEntity);
 
         assertThatThrownBy(() -> studentServiceImpl.addToGroup(5L, 1L))
                 .isInstanceOf(AlreadyExistsException.class);
@@ -246,8 +246,8 @@ class StudentServiceImplTest {
 
     @Test
     void addToGroup_whenGroupNotExists_shouldThrowNotFoundException() {
-        Student student = Student.builder().id(5L).group(Group.builder().id(1L).build()).build();
-        when(studentRepository.findByIdOrThrow(5L)).thenReturn(student);
+        StudentEntity studentEntity = StudentEntity.builder().id(5L).groupEntity(GroupEntity.builder().id(1L).build()).build();
+        when(studentRepository.findByIdOrThrow(5L)).thenReturn(studentEntity);
         when(groupRepository.findByIdOrThrow(99L)).thenThrow(new NotFoundException("not found"));
 
         assertThatThrownBy(() -> studentServiceImpl.addToGroup(5L, 99L))

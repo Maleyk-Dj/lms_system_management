@@ -5,10 +5,10 @@ import com.lms.lms_system_management.dao.CourseRepository;
 import com.lms.lms_system_management.dao.GroupRepository;
 import com.lms.lms_system_management.dao.ScheduleRepository;
 import com.lms.lms_system_management.dao.TeacherRepository;
-import com.lms.lms_system_management.model.Course;
-import com.lms.lms_system_management.model.Group;
-import com.lms.lms_system_management.model.Schedule;
-import com.lms.lms_system_management.model.Teacher;
+import com.lms.lms_system_management.model.CourseEntity;
+import com.lms.lms_system_management.model.GroupEntity;
+import com.lms.lms_system_management.model.ScheduleEntity;
+import com.lms.lms_system_management.model.TeacherEntity;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -27,7 +27,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Import(TestcontainersConfiguration.class)
-class DeleteScheduleControllerTest {
+class DeleteScheduleEntityControllerTest {
     @Autowired
     private TestRestTemplate restTemplate;
 
@@ -44,33 +44,33 @@ class DeleteScheduleControllerTest {
 
     @BeforeEach
     public void setUp() {
-        Teacher teacher = Teacher.builder()
+        TeacherEntity teacherEntity = TeacherEntity.builder()
                 .firstName("Ivan")
                 .lastName("Petrov")
                 .build();
-        teacherRepository.save(teacher);
+        teacherRepository.save(teacherEntity);
 
-        Group group = Group.builder()
+        GroupEntity groupEntity = GroupEntity.builder()
                 .name("Gruppa A")
                 .build();
-        groupRepository.save(group);
+        groupRepository.save(groupEntity);
 
-        Course course = Course.builder()
+        CourseEntity courseEntity = CourseEntity.builder()
                 .name("Java")
                 .description("Kurs po Java")
-                .teacher(teacher)
+                .teacherEntity(teacherEntity)
                 .build();
-        courseRepository.save(course);
+        courseRepository.save(courseEntity);
 
         LocalDateTime scheduleDate = LocalDateTime.of(2026, 7, 1, 10, 0);
 
-        Schedule schedule = Schedule.builder()
-                .group(group)
-                .course(course)
+        ScheduleEntity scheduleEntity = ScheduleEntity.builder()
+                .groupEntity(groupEntity)
+                .courseEntity(courseEntity)
                 .dateClass(scheduleDate)
                 .build();
-        scheduleRepository.save(schedule);
-        scheduleId = schedule.getId();
+        scheduleRepository.save(scheduleEntity);
+        scheduleId = scheduleEntity.getId();
     }
 
     @AfterEach

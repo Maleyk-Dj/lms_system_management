@@ -5,14 +5,12 @@ import com.lms.lms_system_management.dao.CourseRepository;
 import com.lms.lms_system_management.dao.TeacherRepository;
 import com.lms.lms_system_management.dto.course.NewCourseRequest;
 import com.lms.lms_system_management.dto.course.CourseResponse;
-import com.lms.lms_system_management.model.Course;
-import com.lms.lms_system_management.model.Teacher;
+import com.lms.lms_system_management.model.TeacherEntity;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
@@ -40,12 +38,12 @@ class PostCourseControllerTest {
 
     @BeforeEach
     public void setup() {
-        Teacher teacher = Teacher.builder()
+        TeacherEntity teacherEntity = TeacherEntity.builder()
                 .firstName("Li")
                 .lastName("Dja").
                 build();
-        teacherRepository.save(teacher);
-        teacherId = teacher.getId();
+        teacherRepository.save(teacherEntity);
+        teacherId = teacherEntity.getId();
     }
 
     @AfterEach

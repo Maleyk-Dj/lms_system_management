@@ -3,11 +3,10 @@ package com.lms.lms_system_management.controller.course;
 import com.lms.lms_system_management.TestcontainersConfiguration;
 import com.lms.lms_system_management.dao.CourseRepository;
 import com.lms.lms_system_management.dao.TeacherRepository;
-import com.lms.lms_system_management.dto.course.NewCourseRequest;
 import com.lms.lms_system_management.dto.course.UpdateCourseRequest;
 import com.lms.lms_system_management.dto.course.CourseResponse;
-import com.lms.lms_system_management.model.Course;
-import com.lms.lms_system_management.model.Teacher;
+import com.lms.lms_system_management.model.CourseEntity;
+import com.lms.lms_system_management.model.TeacherEntity;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -45,26 +44,26 @@ public class PutCourseControllerTest {
     @BeforeEach
     public void setup() {
 
-        Teacher teacher = Teacher.builder()
+        TeacherEntity teacherEntity = TeacherEntity.builder()
                 .firstName("Li")
                 .lastName("Dja")
                 .build();
-        teacherRepository.save(teacher);
+        teacherRepository.save(teacherEntity);
 
-        Teacher anotherTeacher = Teacher.builder()
+        TeacherEntity anotherTeacherEntity = TeacherEntity.builder()
                 .firstName("Ira")
                 .lastName("Varnava")
                 .build();
-        teacherRepository.save(anotherTeacher);
-        anotherTeacherId = anotherTeacher.getId();
+        teacherRepository.save(anotherTeacherEntity);
+        anotherTeacherId = anotherTeacherEntity.getId();
 
-        Course course = Course.builder()
+        CourseEntity courseEntity = CourseEntity.builder()
                 .name("Java")
                 .description("Kurs po Java")
-                .teacher(teacher)
+                .teacherEntity(teacherEntity)
                 .build();
-        courseRepository.save(course);
-        courseId = course.getId();
+        courseRepository.save(courseEntity);
+        courseId = courseEntity.getId();
     }
 
     @AfterEach

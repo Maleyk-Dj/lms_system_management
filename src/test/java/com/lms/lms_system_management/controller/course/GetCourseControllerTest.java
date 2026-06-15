@@ -4,8 +4,8 @@ import com.lms.lms_system_management.TestcontainersConfiguration;
 import com.lms.lms_system_management.dao.CourseRepository;
 import com.lms.lms_system_management.dao.TeacherRepository;
 import com.lms.lms_system_management.dto.course.CourseResponse;
-import com.lms.lms_system_management.model.Course;
-import com.lms.lms_system_management.model.Teacher;
+import com.lms.lms_system_management.model.CourseEntity;
+import com.lms.lms_system_management.model.TeacherEntity;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -34,20 +34,20 @@ class GetCourseControllerTest {
 
     @BeforeEach
     public void setup() {
-        Teacher teacher = Teacher.builder()
+        TeacherEntity teacherEntity = TeacherEntity.builder()
                 .firstName("Li")
                 .lastName("Dja").
                 build();
-        teacherRepository.save(teacher);
-        teacherId = teacher.getId();
+        teacherRepository.save(teacherEntity);
+        teacherId = teacherEntity.getId();
 
-        Course course = Course.builder()
+        CourseEntity courseEntity = CourseEntity.builder()
                 .name("Java")
                 .description("Kurs po razrabotke Java")
-                .teacher(teacher)
+                .teacherEntity(teacherEntity)
                 .build();
-        courseRepository.save(course);
-        courseId = course.getId();
+        courseRepository.save(courseEntity);
+        courseId = courseEntity.getId();
     }
 
     @AfterEach

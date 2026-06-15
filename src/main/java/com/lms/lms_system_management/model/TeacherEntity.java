@@ -13,7 +13,7 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 @ToString
-public class Teacher {
+public class TeacherEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -26,5 +26,5 @@ public class Teacher {
     private String lastName;
 
     @OneToMany (mappedBy = "teacher")
-    private List <Course> courses;
+    private List <CourseEntity> cours;
 }

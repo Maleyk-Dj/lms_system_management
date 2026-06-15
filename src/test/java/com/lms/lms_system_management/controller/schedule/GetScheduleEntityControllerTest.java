@@ -6,10 +6,10 @@ import com.lms.lms_system_management.dao.GroupRepository;
 import com.lms.lms_system_management.dao.ScheduleRepository;
 import com.lms.lms_system_management.dao.TeacherRepository;
 import com.lms.lms_system_management.dto.schedule.ScheduleResponse;
-import com.lms.lms_system_management.model.Course;
-import com.lms.lms_system_management.model.Group;
-import com.lms.lms_system_management.model.Schedule;
-import com.lms.lms_system_management.model.Teacher;
+import com.lms.lms_system_management.model.CourseEntity;
+import com.lms.lms_system_management.model.GroupEntity;
+import com.lms.lms_system_management.model.ScheduleEntity;
+import com.lms.lms_system_management.model.TeacherEntity;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -26,7 +26,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Import(TestcontainersConfiguration.class)
-class GetScheduleControllerTest {
+class GetScheduleEntityControllerTest {
     @Autowired
     private TestRestTemplate restTemplate;
 
@@ -43,33 +43,33 @@ class GetScheduleControllerTest {
 
     @BeforeEach
     public void setUp() {
-        Teacher teacher = Teacher.builder()
+        TeacherEntity teacherEntity = TeacherEntity.builder()
                 .firstName("Ivan")
                 .lastName("Petrov")
                 .build();
-        teacherRepository.save(teacher);
+        teacherRepository.save(teacherEntity);
 
-        Group group = Group.builder()
+        GroupEntity groupEntity = GroupEntity.builder()
                 .name("Gruppa A")
                 .build();
-        groupRepository.save(group);
-        groupId = group.getId();
+        groupRepository.save(groupEntity);
+        groupId = groupEntity.getId();
 
-        Course course = Course.builder()
+        CourseEntity courseEntity = CourseEntity.builder()
                 .name("Java")
                 .description("Kurs po Java")
-                .teacher(teacher)
+                .teacherEntity(teacherEntity)
                 .build();
-        courseRepository.save(course);
+        courseRepository.save(courseEntity);
 
         LocalDateTime scheduleDate = LocalDateTime.of(2026, 7, 1, 10, 0);
 
-        Schedule schedule = Schedule.builder()
-                .group(group)
-                .course(course)
+        ScheduleEntity scheduleEntity = ScheduleEntity.builder()
+                .groupEntity(groupEntity)
+                .courseEntity(courseEntity)
                 .dateClass(scheduleDate)
                 .build();
-        scheduleRepository.save(schedule);
+        scheduleRepository.save(scheduleEntity);
     }
 
     @AfterEach
@@ -109,13 +109,13 @@ class GetScheduleControllerTest {
 
     @Test
     void getScheduleByGroup_whenNoSchedules_shouldReturn200AndEmptyList() {
-        Group emptyGroup = Group.builder().name("Gruppa B").build();
-        groupRepository.save(emptyGroup);
+        GroupEntity emptyGroupEntity = GroupEntity.builder().name("Gruppa B").build();
+        groupRepository.save(emptyGroupEntity);
 
         ResponseEntity<ScheduleResponse[]> response = restTemplate.getForEntity(
                 "/api/schedules/groups/{groupId}",
                 ScheduleResponse[].class,
-                emptyGroup.getId()
+                emptyGroupEntity.getId()
         );
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);

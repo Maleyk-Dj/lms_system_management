@@ -8,8 +8,8 @@ import com.lms.lms_system_management.dto.course.CourseResponse;
 import com.lms.lms_system_management.dto.teacher.TeacherResponse;
 import com.lms.lms_system_management.exception.NotFoundException;
 import com.lms.lms_system_management.mapper.CourseMapper;
-import com.lms.lms_system_management.model.Course;
-import com.lms.lms_system_management.model.Teacher;
+import com.lms.lms_system_management.model.CourseEntity;
+import com.lms.lms_system_management.model.TeacherEntity;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -41,15 +41,15 @@ public class CourseServiceImplTest {
 
     @Test
     void create_whenTeacherExists_shouldSaveAndReturnResponse() {
-        Teacher teacher = Teacher.builder().id(1L).firstName("Ivan").lastName("Petrov").build();
+        TeacherEntity teacherEntity = TeacherEntity.builder().id(1L).firstName("Ivan").lastName("Petrov").build();
         NewCourseRequest request = new NewCourseRequest("Java", "Kurs po Java", 1L);
-        Course entity = Course.builder().name("Java").description("Kurs po Java").teacher(teacher).build();
-        Course saved = Course.builder().id(10L).name("Java").description("Kurs po Java").teacher(teacher).build();
+        CourseEntity entity = CourseEntity.builder().name("Java").description("Kurs po Java").teacherEntity(teacherEntity).build();
+        CourseEntity saved = CourseEntity.builder().id(10L).name("Java").description("Kurs po Java").teacherEntity(teacherEntity).build();
         CourseResponse expected = new CourseResponse(10L, "Java", "Kurs po Java",
                 new TeacherResponse(1L, "Ivan", "Petrov"));
 
-        when(teacherRepository.findByIdOrThrow(1L)).thenReturn(teacher);
-        when(courseMapper.toEntity(request, teacher)).thenReturn(entity);
+        when(teacherRepository.findByIdOrThrow(1L)).thenReturn(teacherEntity);
+        when(courseMapper.toEntity(request, teacherEntity)).thenReturn(entity);
         when(courseRepository.save(entity)).thenReturn(saved);
         when(courseMapper.toResponse(saved)).thenReturn(expected);
 
@@ -73,13 +73,13 @@ public class CourseServiceImplTest {
 
     @Test
     void findById_whenExists_shouldReturnResponse() {
-        Teacher teacher = Teacher.builder().id(1L).build();
-        Course course = Course.builder().id(5L).name("Java").description("Desc").teacher(teacher).build();
+        TeacherEntity teacherEntity = TeacherEntity.builder().id(1L).build();
+        CourseEntity courseEntity = CourseEntity.builder().id(5L).name("Java").description("Desc").teacherEntity(teacherEntity).build();
         CourseResponse expected = new CourseResponse(5L, "Java", "Desc",
                 new TeacherResponse(1L, null, null));
 
-        when(courseRepository.findByIdOrThrow(5L)).thenReturn(course);
-        when(courseMapper.toResponse(course)).thenReturn(expected);
+        when(courseRepository.findByIdOrThrow(5L)).thenReturn(courseEntity);
+        when(courseMapper.toResponse(courseEntity)).thenReturn(expected);
 
         CourseResponse result = courseService.findById(5L);
 
@@ -98,9 +98,9 @@ public class CourseServiceImplTest {
 
     @Test
     void findAll_shouldReturnListOfResponses() {
-        Teacher teacher = Teacher.builder().id(1L).build();
-        Course c1 = Course.builder().id(1L).name("Java").description("D1").teacher(teacher).build();
-        Course c2 = Course.builder().id(2L).name("Spring").description("D2").teacher(teacher).build();
+        TeacherEntity teacherEntity = TeacherEntity.builder().id(1L).build();
+        CourseEntity c1 = CourseEntity.builder().id(1L).name("Java").description("D1").teacherEntity(teacherEntity).build();
+        CourseEntity c2 = CourseEntity.builder().id(2L).name("Spring").description("D2").teacherEntity(teacherEntity).build();
         CourseResponse r1 = new CourseResponse(1L, "Java", "D1", null);
         CourseResponse r2 = new CourseResponse(2L, "Spring", "D2", null);
 
@@ -124,23 +124,23 @@ public class CourseServiceImplTest {
 
     @Test
     void update_whenCourseAndTeacherExist_shouldUpdateAndReturnResponse() {
-        Teacher oldTeacher = Teacher.builder().id(1L).build();
-        Teacher newTeacher = Teacher.builder().id(2L).firstName("Anna").lastName("Ivanova").build();
-        Course course = Course.builder().id(5L).name("Java").description("Desc").teacher(oldTeacher).build();
+        TeacherEntity oldTeacherEntity = TeacherEntity.builder().id(1L).build();
+        TeacherEntity newTeacherEntity = TeacherEntity.builder().id(2L).firstName("Anna").lastName("Ivanova").build();
+        CourseEntity courseEntity = CourseEntity.builder().id(5L).name("Java").description("Desc").teacherEntity(oldTeacherEntity).build();
         UpdateCourseRequest request = new UpdateCourseRequest("Kotlin", "Kurs po Kotlin", 2L);
-        Course saved = Course.builder().id(5L).name("Kotlin").description("Kurs po Kotlin").teacher(newTeacher).build();
+        CourseEntity saved = CourseEntity.builder().id(5L).name("Kotlin").description("Kurs po Kotlin").teacherEntity(newTeacherEntity).build();
         CourseResponse expected = new CourseResponse(5L, "Kotlin", "Kurs po Kotlin",
                 new TeacherResponse(2L, "Anna", "Ivanova"));
 
-        when(courseRepository.findByIdOrThrow(5L)).thenReturn(course);
-        when(teacherRepository.findByIdOrThrow(2L)).thenReturn(newTeacher);
-        when(courseRepository.save(course)).thenReturn(saved);
+        when(courseRepository.findByIdOrThrow(5L)).thenReturn(courseEntity);
+        when(teacherRepository.findByIdOrThrow(2L)).thenReturn(newTeacherEntity);
+        when(courseRepository.save(courseEntity)).thenReturn(saved);
         when(courseMapper.toResponse(saved)).thenReturn(expected);
 
         CourseResponse result = courseService.update(request, 5L);
 
         assertThat(result).isEqualTo(expected);
-        verify(courseMapper).updateEntity(request, newTeacher, course);
+        verify(courseMapper).updateEntity(request, newTeacherEntity, courseEntity);
     }
 
     @Test
@@ -155,11 +155,11 @@ public class CourseServiceImplTest {
 
     @Test
     void update_whenTeacherNotExists_shouldThrowNotFoundException() {
-        Teacher teacher = Teacher.builder().id(1L).build();
-        Course course = Course.builder().id(5L).name("Java").description("Desc").teacher(teacher).build();
+        TeacherEntity teacherEntity = TeacherEntity.builder().id(1L).build();
+        CourseEntity courseEntity = CourseEntity.builder().id(5L).name("Java").description("Desc").teacherEntity(teacherEntity).build();
         UpdateCourseRequest request = new UpdateCourseRequest("Kotlin", "Desc", 99L);
 
-        when(courseRepository.findByIdOrThrow(5L)).thenReturn(course);
+        when(courseRepository.findByIdOrThrow(5L)).thenReturn(courseEntity);
         when(teacherRepository.findByIdOrThrow(99L)).thenThrow(new NotFoundException("not found"));
 
         assertThatThrownBy(() -> courseService.update(request, 5L))
@@ -171,13 +171,13 @@ public class CourseServiceImplTest {
 
     @Test
     void delete_whenExists_shouldDelete() {
-        Teacher teacher = Teacher.builder().id(1L).build();
-        Course course = Course.builder().id(5L).teacher(teacher).build();
-        when(courseRepository.findByIdOrThrow(5L)).thenReturn(course);
+        TeacherEntity teacherEntity = TeacherEntity.builder().id(1L).build();
+        CourseEntity courseEntity = CourseEntity.builder().id(5L).teacherEntity(teacherEntity).build();
+        when(courseRepository.findByIdOrThrow(5L)).thenReturn(courseEntity);
 
         courseService.delete(5L);
 
-        verify(courseRepository).delete(course);
+        verify(courseRepository).delete(courseEntity);
     }
 
     @Test

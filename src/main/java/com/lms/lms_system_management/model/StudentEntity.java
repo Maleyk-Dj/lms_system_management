@@ -11,7 +11,7 @@ import lombok.*;
 @NoArgsConstructor
 @ToString
 @Builder
-public class Student {
+public class StudentEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -25,5 +25,5 @@ public class Student {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn (name = "group_id",nullable = false)
-    private Group group;
+    private GroupEntity groupEntity;
 }

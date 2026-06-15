@@ -4,8 +4,8 @@ import com.lms.lms_system_management.TestcontainersConfiguration;
 import com.lms.lms_system_management.dao.GroupRepository;
 import com.lms.lms_system_management.dao.StudentRepository;
 import com.lms.lms_system_management.dto.student.StudentResponse;
-import com.lms.lms_system_management.model.Group;
-import com.lms.lms_system_management.model.Student;
+import com.lms.lms_system_management.model.GroupEntity;
+import com.lms.lms_system_management.model.StudentEntity;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -13,6 +13,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.context.annotation.Import;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
@@ -20,7 +22,8 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Import(TestcontainersConfiguration.class)
-class GetStudentControllerTest {
+class PatchStudentEntityControllerTest {
+
     @Autowired
     private TestRestTemplate restTemplate;
     @Autowired
@@ -30,27 +33,29 @@ class GetStudentControllerTest {
 
     private Long studentId;
     private Long groupId;
+    private Long anotherGroupId;
 
     @BeforeEach
     public void setUp() {
-        Group group = Group.builder().
+        GroupEntity groupEntity = GroupEntity.builder().
                 name("Gruppa A")
                 .build();
-        groupRepository.save(group);
-        groupId = group.getId();
+        groupRepository.save(groupEntity);
+        groupId = groupEntity.getId();
 
-        Group anotherGroup = Group.builder().
+        GroupEntity anotherGroupEntity = GroupEntity.builder().
                 name("Gruppa B")
                 .build();
-        groupRepository.save(anotherGroup);
+        groupRepository.save(anotherGroupEntity);
+        anotherGroupId = anotherGroupEntity.getId();
 
-        Student student = Student.builder()
+        StudentEntity studentEntity = StudentEntity.builder()
                 .firstName("Valya")
                 .lastName("Ivanova")
-                .group(group)
+                .groupEntity(groupEntity)
                 .build();
-        studentRepository.save(student);
-        studentId = student.getId();
+        studentRepository.save(studentEntity);
+        studentId = studentEntity.getId();
     }
 
     @AfterEach
@@ -58,6 +63,7 @@ class GetStudentControllerTest {
         studentRepository.deleteAll();
         groupRepository.deleteAll();
     }
+
     @Test
     void getStudentById_shouldReturn200AndCorrectBody() {
         ResponseEntity<StudentResponse> response = restTemplate.getForEntity(
@@ -94,5 +100,47 @@ class GetStudentControllerTest {
         StudentResponse[] body = response.getBody();
         assertThat(body).isNotNull();
         assertThat(body.length).isGreaterThan(0);
+    }
+
+    @Test
+    void addToGroup_shouldReturn200AndUpdateGroupId() {
+        ResponseEntity<StudentResponse> response = restTemplate.exchange(
+                "/api/students/{studentId}/groups/{groupId}",
+                HttpMethod.PATCH,
+                HttpEntity.EMPTY,
+                StudentResponse.class,
+                studentId,
+                anotherGroupId
+        );
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        StudentResponse body = response.getBody();
+        assertThat(body).isNotNull();
+        assertThat(body.groupId()).isEqualTo(anotherGroupId);
+    }
+
+    @Test
+    void addToGroup_whenAlreadyInGroup_shouldReturn409() {
+        ResponseEntity<Void> response = restTemplate.exchange(
+                "/api/students/{studentId}/groups/{groupId}",
+                HttpMethod.PATCH,
+                HttpEntity.EMPTY,
+                Void.class,
+                studentId,
+                groupId
+        );
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
+    }
+
+    @Test
+    void addToGroup_whenStudentNotExists_shouldReturn404() {
+        ResponseEntity<Void> response = restTemplate.exchange(
+                "/api/students/{studentId}/groups/{groupId}",
+                HttpMethod.PATCH,
+                HttpEntity.EMPTY,
+                Void.class,
+                999999L,
+                groupId
+        );
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
     }
 }

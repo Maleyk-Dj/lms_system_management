@@ -4,7 +4,7 @@ import com.lms.lms_system_management.TestcontainersConfiguration;
 import com.lms.lms_system_management.dao.GroupRepository;
 import com.lms.lms_system_management.dto.group.UpdateGroupRequest;
 import com.lms.lms_system_management.dto.group.GroupResponse;
-import com.lms.lms_system_management.model.Group;
+import com.lms.lms_system_management.model.GroupEntity;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -33,11 +33,11 @@ class PutGroupControllerTest {
 
     @BeforeEach
     public void setUp() {
-        Group group = Group.builder()
+        GroupEntity groupEntity = GroupEntity.builder()
                 .name("Gruppa A")
                 .build();
-        groupRepository.save(group);
-        groupId = group.getId();
+        groupRepository.save(groupEntity);
+        groupId = groupEntity.getId();
     }
 
     @AfterEach

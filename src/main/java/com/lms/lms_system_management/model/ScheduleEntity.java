@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class Schedule {
+public class ScheduleEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -21,11 +21,11 @@ public class Schedule {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn (name = "group_id", nullable = false)
-    private Group group;
+    private GroupEntity groupEntity;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn (name = "course_id", nullable = false)
-    private Course course;
+    private CourseEntity courseEntity;
 
     @Column (nullable = false)
     private LocalDateTime dateClass;

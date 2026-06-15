@@ -4,7 +4,7 @@ import com.lms.lms_system_management.TestcontainersConfiguration;
 import com.lms.lms_system_management.dao.TeacherRepository;
 import com.lms.lms_system_management.dto.teacher.NewTeacherRequest;
 import com.lms.lms_system_management.dto.teacher.TeacherResponse;
-import com.lms.lms_system_management.model.Teacher;
+import com.lms.lms_system_management.model.TeacherEntity;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -23,7 +23,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Import(TestcontainersConfiguration.class)
-class PostTeacherControllerTest {
+class PostTeacherEntityControllerTest {
 
     @Autowired
     private TestRestTemplate testRestTemplate;
@@ -34,11 +34,11 @@ class PostTeacherControllerTest {
 
     @BeforeEach
     public void setup() {
-        Teacher teacher = Teacher.builder()
+        TeacherEntity teacherEntity = TeacherEntity.builder()
                 .firstName("Malika")
                 .lastName("Djabrailova")
                 .build();
-        teacherRepository.save(teacher);
+        teacherRepository.save(teacherEntity);
     }
 
     @AfterEach

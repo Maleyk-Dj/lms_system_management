@@ -9,8 +9,8 @@ import com.lms.lms_system_management.dto.schedule.ScheduleResponse;
 import com.lms.lms_system_management.exception.NotFoundException;
 import com.lms.lms_system_management.mapper.ScheduleMapper;
 import com.lms.lms_system_management.mapper.TeacherMapper;
-import com.lms.lms_system_management.model.Schedule;
-import com.lms.lms_system_management.model.Teacher;
+import com.lms.lms_system_management.model.ScheduleEntity;
+import com.lms.lms_system_management.model.TeacherEntity;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -24,7 +24,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class TeacherServiceImplTest {
+class TeacherEntityServiceImplTest {
 
     @Mock
     private TeacherRepository teacherRepository;
@@ -46,8 +46,8 @@ class TeacherServiceImplTest {
     @Test
     void create_shouldSaveAndReturnResponse() {
         NewTeacherRequest request = new NewTeacherRequest("Ivan", "Petrov");
-        Teacher entity = Teacher.builder().firstName("Ivan").lastName("Petrov").build();
-        Teacher saved = Teacher.builder().id(1L).firstName("Ivan").lastName("Petrov").build();
+        TeacherEntity entity = TeacherEntity.builder().firstName("Ivan").lastName("Petrov").build();
+        TeacherEntity saved = TeacherEntity.builder().id(1L).firstName("Ivan").lastName("Petrov").build();
         TeacherResponse expected = new TeacherResponse(1L, "Ivan", "Petrov");
 
         when(teacherMapper.toEntity(request)).thenReturn(entity);
@@ -64,11 +64,11 @@ class TeacherServiceImplTest {
 
     @Test
     void getById_whenExists_shouldReturnResponse() {
-        Teacher teacher = Teacher.builder().id(1L).firstName("Ivan").lastName("Petrov").build();
+        TeacherEntity teacherEntity = TeacherEntity.builder().id(1L).firstName("Ivan").lastName("Petrov").build();
         TeacherResponse expected = new TeacherResponse(1L, "Ivan", "Petrov");
 
-        when(teacherRepository.findByIdOrThrow(1L)).thenReturn(teacher);
-        when(teacherMapper.toResponse(teacher)).thenReturn(expected);
+        when(teacherRepository.findByIdOrThrow(1L)).thenReturn(teacherEntity);
+        when(teacherMapper.toResponse(teacherEntity)).thenReturn(expected);
 
         TeacherResponse result = teacherService.getById(1L);
 
@@ -87,8 +87,8 @@ class TeacherServiceImplTest {
 
     @Test
     void getAll_shouldReturnListOfResponses() {
-        Teacher t1 = Teacher.builder().id(1L).firstName("Ivan").lastName("Petrov").build();
-        Teacher t2 = Teacher.builder().id(2L).firstName("Anna").lastName("Ivanova").build();
+        TeacherEntity t1 = TeacherEntity.builder().id(1L).firstName("Ivan").lastName("Petrov").build();
+        TeacherEntity t2 = TeacherEntity.builder().id(2L).firstName("Anna").lastName("Ivanova").build();
         TeacherResponse r1 = new TeacherResponse(1L, "Ivan", "Petrov");
         TeacherResponse r2 = new TeacherResponse(2L, "Anna", "Ivanova");
 
@@ -113,18 +113,18 @@ class TeacherServiceImplTest {
     @Test
     void update_whenExists_shouldUpdateAndReturnResponse() {
         UpdateTeacherRequest request = new UpdateTeacherRequest("Anna", "Ivanova");
-        Teacher teacher = Teacher.builder().id(1L).firstName("Ivan").lastName("Petrov").build();
-        Teacher saved = Teacher.builder().id(1L).firstName("Anna").lastName("Ivanova").build();
+        TeacherEntity teacherEntity = TeacherEntity.builder().id(1L).firstName("Ivan").lastName("Petrov").build();
+        TeacherEntity saved = TeacherEntity.builder().id(1L).firstName("Anna").lastName("Ivanova").build();
         TeacherResponse expected = new TeacherResponse(1L, "Anna", "Ivanova");
 
-        when(teacherRepository.findByIdOrThrow(1L)).thenReturn(teacher);
-        when(teacherRepository.save(teacher)).thenReturn(saved);
+        when(teacherRepository.findByIdOrThrow(1L)).thenReturn(teacherEntity);
+        when(teacherRepository.save(teacherEntity)).thenReturn(saved);
         when(teacherMapper.toResponse(saved)).thenReturn(expected);
 
         TeacherResponse result = teacherService.update(request, 1L);
 
         assertThat(result).isEqualTo(expected);
-        verify(teacherMapper).updateEntity(request, teacher);
+        verify(teacherMapper).updateEntity(request, teacherEntity);
     }
 
     @Test
@@ -141,12 +141,12 @@ class TeacherServiceImplTest {
 
     @Test
     void deleteById_whenExists_shouldDelete() {
-        Teacher teacher = Teacher.builder().id(1L).firstName("Ivan").lastName("Petrov").build();
-        when(teacherRepository.findByIdOrThrow(1L)).thenReturn(teacher);
+        TeacherEntity teacherEntity = TeacherEntity.builder().id(1L).firstName("Ivan").lastName("Petrov").build();
+        when(teacherRepository.findByIdOrThrow(1L)).thenReturn(teacherEntity);
 
         teacherService.deleteById(1L);
 
-        verify(teacherRepository).delete(teacher);
+        verify(teacherRepository).delete(teacherEntity);
     }
 
     @Test
@@ -162,13 +162,13 @@ class TeacherServiceImplTest {
 
     @Test
     void getScheduleByTeacher_whenExists_shouldReturnSchedules() {
-        Teacher teacher = Teacher.builder().id(1L).build();
-        Schedule schedule = Schedule.builder().id(10L).build();
+        TeacherEntity teacherEntity = TeacherEntity.builder().id(1L).build();
+        ScheduleEntity scheduleEntity = ScheduleEntity.builder().id(10L).build();
         ScheduleResponse scheduleResponse = new ScheduleResponse(10L, null, null, null);
 
-        when(teacherRepository.findByIdOrThrow(1L)).thenReturn(teacher);
-        when(scheduleRepository.findByCourseTeacherId(1L)).thenReturn(List.of(schedule));
-        when(scheduleMapper.toResponse(schedule)).thenReturn(scheduleResponse);
+        when(teacherRepository.findByIdOrThrow(1L)).thenReturn(teacherEntity);
+        when(scheduleRepository.findByCourseTeacherId(1L)).thenReturn(List.of(scheduleEntity));
+        when(scheduleMapper.toResponse(scheduleEntity)).thenReturn(scheduleResponse);
 
         List<ScheduleResponse> result = teacherService.getScheduleByTeacher(1L);
 
@@ -177,8 +177,8 @@ class TeacherServiceImplTest {
 
     @Test
     void getScheduleByTeacher_whenNoSchedules_shouldReturnEmptyList() {
-        Teacher teacher = Teacher.builder().id(1L).build();
-        when(teacherRepository.findByIdOrThrow(1L)).thenReturn(teacher);
+        TeacherEntity teacherEntity = TeacherEntity.builder().id(1L).build();
+        when(teacherRepository.findByIdOrThrow(1L)).thenReturn(teacherEntity);
         when(scheduleRepository.findByCourseTeacherId(1L)).thenReturn(List.of());
 
         List<ScheduleResponse> result = teacherService.getScheduleByTeacher(1L);
