@@ -1,23 +1,19 @@
 package com.lms.lms_system_management.controller;
 
 import com.lms.lms_system_management.dto.teacher.NewTeacherRequest;
+import com.lms.lms_system_management.dto.teacher.TeacherFilter;
 import com.lms.lms_system_management.dto.teacher.UpdateTeacherRequest;
 import com.lms.lms_system_management.dto.schedule.ScheduleResponse;
 import com.lms.lms_system_management.dto.teacher.TeacherResponse;
 import com.lms.lms_system_management.service.TeacherService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.*;
+
 import java.util.List;
 
 @RestController
@@ -40,8 +36,8 @@ public class TeacherController {
     }
 
     @GetMapping
-    public List<TeacherResponse> getTeachers() {
-        return teacherService.getAll();
+    public Page<TeacherResponse> getTeachers(@ModelAttribute TeacherFilter teacherFilter, Pageable pageable) {
+        return teacherService.getAll(teacherFilter, pageable);
     }
 
     @PatchMapping("/{teacherId}")

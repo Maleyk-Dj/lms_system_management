@@ -3,6 +3,7 @@ package com.lms.lms_system_management.service;
 import com.lms.lms_system_management.dao.ScheduleRepository;
 import com.lms.lms_system_management.dao.TeacherRepository;
 import com.lms.lms_system_management.dto.teacher.NewTeacherRequest;
+import com.lms.lms_system_management.dto.teacher.TeacherFilter;
 import com.lms.lms_system_management.dto.teacher.UpdateTeacherRequest;
 import com.lms.lms_system_management.dto.teacher.TeacherResponse;
 import com.lms.lms_system_management.dto.schedule.ScheduleResponse;
@@ -16,6 +17,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 
 import java.util.List;
 
@@ -84,30 +90,36 @@ class TeacherEntityServiceImplTest {
     }
 
     // GET ALL
-
     @Test
     void getAll_shouldReturnListOfResponses() {
+        TeacherFilter filter = new TeacherFilter(null, null);
+        Pageable pageable = PageRequest.of(0, 10);
+
         TeacherEntity t1 = TeacherEntity.builder().id(1L).firstName("Ivan").lastName("Petrov").build();
         TeacherEntity t2 = TeacherEntity.builder().id(2L).firstName("Anna").lastName("Ivanova").build();
         TeacherResponse r1 = new TeacherResponse(1L, "Ivan", "Petrov");
         TeacherResponse r2 = new TeacherResponse(2L, "Anna", "Ivanova");
 
-        when(teacherRepository.findAll()).thenReturn(List.of(t1, t2));
+        when(teacherRepository.findAll(any(Specification.class), eq(pageable)))
+                .thenReturn(new PageImpl<>(List.of(t1, t2)));
         when(teacherMapper.toResponse(t1)).thenReturn(r1);
         when(teacherMapper.toResponse(t2)).thenReturn(r2);
 
-        List<TeacherResponse> result = teacherService.getAll();
+        Page<TeacherResponse> result = teacherService.getAll(filter, pageable);
 
-        assertThat(result).hasSize(2).containsExactly(r1, r2);
+        assertThat(result.getContent()).hasSize(2).containsExactly(r1, r2);
     }
 
     @Test
     void getAll_whenEmpty_shouldReturnEmptyList() {
-        when(teacherRepository.findAll()).thenReturn(List.of());
+        TeacherFilter filter = new TeacherFilter(null, null);
+        Pageable pageable = PageRequest.of(0, 10);
 
-        assertThat(teacherService.getAll()).isEmpty();
+        when(teacherRepository.findAll(any(Specification.class), eq(pageable)))
+                .thenReturn(new PageImpl<>(List.of()));
+
+        assertThat(teacherService.getAll(filter, pageable).getContent()).isEmpty();
     }
-
     // UPDATE
 
     @Test
@@ -155,7 +167,7 @@ class TeacherEntityServiceImplTest {
 
         assertThatThrownBy(() -> teacherService.deleteById(99L))
                 .isInstanceOf(NotFoundException.class);
-        verify(teacherRepository, never()).delete(any());
+        verify(teacherRepository, never()).delete(any(TeacherEntity.class));
     }
 
     // GET SCHEDULE BY TEACHER
