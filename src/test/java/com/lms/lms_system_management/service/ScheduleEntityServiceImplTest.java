@@ -186,7 +186,7 @@ class ScheduleEntityServiceImplTest {
         ScheduleResponse r2 = new ScheduleResponse(2L, null, null, DATE.plusDays(1));
 
         when(groupRepository.findByIdOrThrow(1L)).thenReturn(groupEntity);
-        when(scheduleRepository.findAllByGroupId(1L)).thenReturn(List.of(s1, s2));
+        when(scheduleRepository.findAllByGroupEntityId(1L)).thenReturn(List.of(s1, s2));
         when(scheduleMapper.toResponse(s1)).thenReturn(r1);
         when(scheduleMapper.toResponse(s2)).thenReturn(r2);
 
@@ -207,7 +207,7 @@ class ScheduleEntityServiceImplTest {
     void getScheduleByGroup_whenNoSchedules_shouldReturnEmptyList() {
         GroupEntity groupEntity = GroupEntity.builder().id(1L).build();
         when(groupRepository.findByIdOrThrow(1L)).thenReturn(groupEntity);
-        when(scheduleRepository.findAllByGroupId(1L)).thenReturn(List.of());
+        when(scheduleRepository.findAllByGroupEntityId(1L)).thenReturn(List.of());
 
         List<ScheduleResponse> result = scheduleService.getScheduleByGroup(1L);
 

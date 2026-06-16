@@ -25,6 +25,6 @@ public class TeacherEntity {
     @Column (name = "last_name", nullable = false, length = 50)
     private String lastName;
 
-    @OneToMany (mappedBy = "teacher")
-    private List <CourseEntity> cours;
+    @OneToMany (mappedBy = "teacherEntity")
+    private List <CourseEntity> courses;
 }

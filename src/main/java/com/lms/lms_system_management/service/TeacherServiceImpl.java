@@ -49,15 +49,15 @@ public class TeacherServiceImpl implements TeacherService {
 
     @Transactional(readOnly = true)
     @Override
-    public Page<TeacherResponse> getAll(TeacherFilter filter, Pageable pageable) {
+    public Page <TeacherResponse> getAll(TeacherFilter filter, Pageable pageable) {
 
-        Specification<TeacherEntity> spec = Specification
+        Specification <TeacherEntity> spec = Specification
                 .allOf(
                         hasFirstName(filter.firstName()),
                         hasLastName(filter.lastName())
                 );
 
-        return teacherRepository.findAll(spec, pageable)
+        return teacherRepository.findAll(spec,pageable)
                 .map(teacherMapper::toResponse);
     }
 
@@ -84,7 +84,7 @@ public class TeacherServiceImpl implements TeacherService {
     @Override
     public List<ScheduleResponse> getScheduleByTeacher(Long id) {
 
-        return scheduleRepository.findByCourseTeacherId(id)
+        return scheduleRepository.findByCourseEntityTeacherEntityId(id)
                 .stream()
                 .map(scheduleMapper::toResponse)
                 .toList();

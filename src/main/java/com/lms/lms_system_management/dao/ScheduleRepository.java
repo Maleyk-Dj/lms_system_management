@@ -15,7 +15,7 @@ public interface ScheduleRepository extends JpaRepository<ScheduleEntity, Long> 
                 .orElseThrow(() -> new NotFoundException("Расписание с id " + id + " не найдено"));
     }
 
-    List<ScheduleEntity> findByCourseTeacherId(Long teacherId);
+    List<ScheduleEntity> findByCourseEntityTeacherEntityId(Long teacherId);
 
-    List<ScheduleEntity> findAllByGroupId(Long groupId);
+    List<ScheduleEntity> findAllByGroupEntityId(Long groupId);
 }

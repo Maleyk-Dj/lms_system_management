@@ -11,16 +11,18 @@ import org.mapstruct.*;
 public interface StudentMapper {
 
     @Mapping(target = "id", ignore = true)
+    @Mapping(target = "groupEntity", ignore = true)
     StudentEntity toEntity(NewStudentRequest newStudentRequest);
 
     @Mapping(target = "id", ignore = true)
+    @Mapping(target = "groupEntity", source = "groupEntity")
     StudentEntity toEntity(NewStudentRequest request, GroupEntity groupEntity);
 
-    @Mapping(target = "groupId", source = "group.id")
+    @Mapping(target = "groupId", source = "groupEntity.id")
     StudentResponse toResponse(StudentEntity studentEntity);
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
-    @Mapping(target = "group", ignore = true)
+    @Mapping(target = "groupEntity", ignore = true)
     @Mapping(target = "id", ignore = true)
     void updateStudent(UpdateStudentRequest request, @MappingTarget StudentEntity studentEntity);
 }

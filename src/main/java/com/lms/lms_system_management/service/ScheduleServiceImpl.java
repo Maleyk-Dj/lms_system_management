@@ -63,7 +63,7 @@ public class ScheduleServiceImpl implements ScheduleService {
     @Override
     public List<ScheduleResponse> getScheduleByGroup(Long groupId) {
 
-        return scheduleRepository.findAllByGroupId(groupId)
+        return scheduleRepository.findAllByGroupEntityId(groupId)
                 .stream()
                 .map(scheduleMapper::toResponse)
                 .toList();

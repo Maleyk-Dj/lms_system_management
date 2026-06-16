@@ -21,5 +21,6 @@ public interface TeacherMapper {
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     @Mapping(target = "id", ignore = true)
+    @Mapping(target = "courses", ignore = true)
     void updateEntity(UpdateTeacherRequest request, @MappingTarget TeacherEntity teacherEntity);
 }

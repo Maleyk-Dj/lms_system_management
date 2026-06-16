@@ -179,7 +179,7 @@ class TeacherEntityServiceImplTest {
         ScheduleResponse scheduleResponse = new ScheduleResponse(10L, null, null, null);
 
         when(teacherRepository.findByIdOrThrow(1L)).thenReturn(teacherEntity);
-        when(scheduleRepository.findByCourseTeacherId(1L)).thenReturn(List.of(scheduleEntity));
+        when(scheduleRepository.findByCourseEntityTeacherEntityId(1L)).thenReturn(List.of(scheduleEntity));
         when(scheduleMapper.toResponse(scheduleEntity)).thenReturn(scheduleResponse);
 
         List<ScheduleResponse> result = teacherService.getScheduleByTeacher(1L);
@@ -191,7 +191,7 @@ class TeacherEntityServiceImplTest {
     void getScheduleByTeacher_whenNoSchedules_shouldReturnEmptyList() {
         TeacherEntity teacherEntity = TeacherEntity.builder().id(1L).build();
         when(teacherRepository.findByIdOrThrow(1L)).thenReturn(teacherEntity);
-        when(scheduleRepository.findByCourseTeacherId(1L)).thenReturn(List.of());
+        when(scheduleRepository.findByCourseEntityTeacherEntityId(1L)).thenReturn(List.of());
 
         List<ScheduleResponse> result = teacherService.getScheduleByTeacher(1L);
 

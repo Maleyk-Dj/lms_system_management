@@ -12,15 +12,21 @@ import org.mapstruct.*;
 public interface ScheduleMapper {
 
     @Mapping(target = "id", ignore = true)
+    @Mapping(target = "groupEntity", source = "groupEntity")
+    @Mapping(target = "courseEntity", source = "courseEntity")
     @Mapping(source = "newScheduleRequest.date", target = "dateClass")
-    ScheduleEntity toEntity(NewScheduleRequest newScheduleRequest, GroupEntity groupEntity, CourseEntity courseEntity);
+    ScheduleEntity toEntity(NewScheduleRequest newScheduleRequest, GroupEntity groupEntity,
+                            CourseEntity courseEntity);
 
     @Mapping(source = "dateClass", target = "date")
+    @Mapping(source = "groupEntity", target = "group")
+    @Mapping(source = "courseEntity", target = "course")
     ScheduleResponse toResponse(ScheduleEntity scheduleEntity);
 
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "group", source = "group")
-    @Mapping(target = "course", source = "course")
+    @Mapping(target = "groupEntity", source = "groupEntity")
+    @Mapping(target = "courseEntity", source = "courseEntity")
     @Mapping(source = "request.date", target = "dateClass")
-    void updateSchedule(UpdateScheduleRequest request, GroupEntity groupEntity, CourseEntity courseEntity, @MappingTarget ScheduleEntity scheduleEntity);
+    void updateSchedule(UpdateScheduleRequest request, GroupEntity groupEntity,
+                        CourseEntity courseEntity, @MappingTarget ScheduleEntity scheduleEntity);
 }
