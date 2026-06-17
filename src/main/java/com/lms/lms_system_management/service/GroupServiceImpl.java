@@ -33,7 +33,7 @@ public class GroupServiceImpl implements GroupService {
     }
 
     @Override
-    public GroupResponse findById(Long id) {
+    public GroupResponse getById(Long id) {
 
         GroupEntity groupEntity = groupRepository.findByIdOrThrow(id);
         return groupMapper.toResponse(groupEntity);
@@ -41,7 +41,7 @@ public class GroupServiceImpl implements GroupService {
 
     @Transactional(readOnly = true)
     @Override
-    public Page<GroupResponse> findAll(GroupFilter filter, Pageable pageable) {
+    public Page<GroupResponse> getAll(GroupFilter filter, Pageable pageable) {
 
         Specification<GroupEntity> spec = Specification
                 .allOf(
@@ -67,6 +67,7 @@ public class GroupServiceImpl implements GroupService {
     public void deleteById(Long id) {
 
         GroupEntity deleted = groupRepository.findByIdOrThrow(id);
-        groupRepository.delete(deleted);
+        deleted.setDeleted(true);
+        groupRepository.save(deleted);
     }
 }

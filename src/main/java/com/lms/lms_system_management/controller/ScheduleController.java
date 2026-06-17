@@ -13,9 +13,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-
-import java.util.List;
-
 @RestController
 @RequestMapping("/api/schedules")
 @RequiredArgsConstructor
@@ -38,7 +35,7 @@ public class ScheduleController {
     @DeleteMapping("/{scheduleId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@PathVariable("scheduleId") Long id) {
-        scheduleService.delete(id);
+        scheduleService.deleteById(id);
     }
 
     @GetMapping

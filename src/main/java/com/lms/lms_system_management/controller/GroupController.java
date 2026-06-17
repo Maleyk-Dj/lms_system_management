@@ -21,11 +21,6 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.DeleteMapping;
 
-
-
-
-import java.util.List;
-
 @RestController
 @RequestMapping("/api/groups")
 @RequiredArgsConstructor
@@ -41,13 +36,13 @@ public class GroupController {
 
     @GetMapping("/{groupId}")
     public GroupResponse getGroupById(@PathVariable("groupId") Long id) {
-        return groupService.findById(id);
+        return groupService.getById(id);
     }
 
     @GetMapping
     public Page<GroupResponse> getGroups(GroupFilter filter, Pageable pageable) {
 
-        return groupService.findAll(filter, pageable);
+        return groupService.getAll(filter, pageable);
     }
 
     @PutMapping("/{groupId}")

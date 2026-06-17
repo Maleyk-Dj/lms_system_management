@@ -29,7 +29,7 @@ public class CourseController {
 
     @GetMapping("/{courseId}")
     public CourseResponse getCourse(@PathVariable("courseId") Long id) {
-        return courseService.findById(id);
+        return courseService.getById(id);
     }
 
     @GetMapping
@@ -46,6 +46,6 @@ public class CourseController {
     @DeleteMapping("/{courseId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteCourse(@PathVariable("courseId") Long id) {
-        courseService.delete(id);
+        courseService.deleteById(id);
     }
 }

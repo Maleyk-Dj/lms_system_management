@@ -41,7 +41,7 @@ public class CourseServiceImpl implements CourseService {
 
     @Transactional(readOnly = true)
     @Override
-    public CourseResponse findById(Long id) {
+    public CourseResponse getById(Long id) {
 
         CourseEntity findable = courseRepository.findByIdOrThrow(id);
         return courseMapper.toResponse(findable);
@@ -75,9 +75,10 @@ public class CourseServiceImpl implements CourseService {
 
     @Transactional
     @Override
-    public void delete(Long id) {
+    public void deleteById(Long id) {
 
         CourseEntity deleted = courseRepository.findByIdOrThrow(id);
-        courseRepository.delete(deleted);
+        deleted.setDeleted(true);
+        courseRepository.save(deleted);
     }
 }

@@ -18,9 +18,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import static com.lms.lms_system_management.dao.specification.StudentSpecification.hasGroupId;
-import static com.lms.lms_system_management.dao.specification.StudentSpecification.hasFirstName;
-import static com.lms.lms_system_management.dao.specification.StudentSpecification.hasLastName;
+import static com.lms.lms_system_management.dao.specification.StudentSpecification.*;
 
 @Service
 @RequiredArgsConstructor
@@ -50,7 +48,7 @@ public class StudentServiceImpl implements StudentService {
     @Override
     public Page<StudentResponse> getAll(StudentFilter filter, Pageable pageable) {
 
-        Specification<StudentEntity> spec =Specification
+        Specification<StudentEntity> spec = Specification
                 .allOf(
                         hasFirstName(filter.firstName()),
                         hasLastName(filter.lastName()),
@@ -78,7 +76,8 @@ public class StudentServiceImpl implements StudentService {
     public void deleteById(Long id) {
 
         StudentEntity deleted = studentRepository.findByIdOrThrow(id);
-        studentRepository.delete(deleted);
+        deleted.setDeleted(true);
+        studentRepository.save(deleted);
     }
 
     @Transactional

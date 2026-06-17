@@ -72,7 +72,7 @@ public class CourseServiceImplTest {
     // FIND BY ID
 
     @Test
-    void findById_whenExists_shouldReturnResponse() {
+    void getById_whenExists_shouldReturnResponse() {
         TeacherEntity teacherEntity = TeacherEntity.builder().id(1L).build();
         CourseEntity courseEntity = CourseEntity.builder().id(5L).name("Java").description("Desc").teacherEntity(teacherEntity).build();
         CourseResponse expected = new CourseResponse(5L, "Java", "Desc",
@@ -81,16 +81,16 @@ public class CourseServiceImplTest {
         when(courseRepository.findByIdOrThrow(5L)).thenReturn(courseEntity);
         when(courseMapper.toResponse(courseEntity)).thenReturn(expected);
 
-        CourseResponse result = courseService.findById(5L);
+        CourseResponse result = courseService.getById(5L);
 
         assertThat(result).isEqualTo(expected);
     }
 
     @Test
-    void findById_whenNotExists_shouldThrowNotFoundException() {
+    void getById_whenNotExists_shouldThrowNotFoundException() {
         when(courseRepository.findByIdOrThrow(99L)).thenThrow(new NotFoundException("not found"));
 
-        assertThatThrownBy(() -> courseService.findById(99L))
+        assertThatThrownBy(() -> courseService.getById(99L))
                 .isInstanceOf(NotFoundException.class);
     }
 
@@ -170,21 +170,21 @@ public class CourseServiceImplTest {
     // DELETE
 
     @Test
-    void delete_whenExists_shouldDelete() {
+    void delete_whenExists_shouldDeleteById() {
         TeacherEntity teacherEntity = TeacherEntity.builder().id(1L).build();
         CourseEntity courseEntity = CourseEntity.builder().id(5L).teacherEntity(teacherEntity).build();
         when(courseRepository.findByIdOrThrow(5L)).thenReturn(courseEntity);
 
-        courseService.delete(5L);
+        courseService.deleteById(5L);
 
         verify(courseRepository).delete(courseEntity);
     }
 
     @Test
-    void delete_whenNotExists_shouldThrowNotFoundException() {
+    void delete_ById_whenNotExists_shouldThrowNotFoundException() {
         when(courseRepository.findByIdOrThrow(99L)).thenThrow(new NotFoundException("not found"));
 
-        assertThatThrownBy(() -> courseService.delete(99L))
+        assertThatThrownBy(() -> courseService.deleteById(99L))
                 .isInstanceOf(NotFoundException.class);
         verify(courseRepository, never()).delete(any());
     }

@@ -11,9 +11,9 @@ public interface GroupService {
 
     GroupResponse create(NewGroupRequest newGroup);
 
-    GroupResponse findById(Long id);
+    GroupResponse getById(Long id);
 
-    Page<GroupResponse> findAll(GroupFilter filter, Pageable pageable);
+    Page<GroupResponse> getAll(GroupFilter filter, Pageable pageable);
 
     GroupResponse update(UpdateGroupRequest updateGroupRequest, Long id);
 

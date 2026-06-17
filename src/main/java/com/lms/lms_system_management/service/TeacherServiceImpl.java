@@ -20,8 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-import static com.lms.lms_system_management.dao.specification.TeacherSpecification.hasFirstName;
-import static com.lms.lms_system_management.dao.specification.TeacherSpecification.hasLastName;
+import static com.lms.lms_system_management.dao.specification.TeacherSpecification.*;
 
 @Service
 @RequiredArgsConstructor
@@ -49,15 +48,15 @@ public class TeacherServiceImpl implements TeacherService {
 
     @Transactional(readOnly = true)
     @Override
-    public Page <TeacherResponse> getAll(TeacherFilter filter, Pageable pageable) {
+    public Page<TeacherResponse> getAll(TeacherFilter filter, Pageable pageable) {
 
-        Specification <TeacherEntity> spec = Specification
+        Specification<TeacherEntity> spec = Specification
                 .allOf(
                         hasFirstName(filter.firstName()),
                         hasLastName(filter.lastName())
                 );
 
-        return teacherRepository.findAll(spec,pageable)
+        return teacherRepository.findAll(spec, pageable)
                 .map(teacherMapper::toResponse);
     }
 
@@ -76,7 +75,8 @@ public class TeacherServiceImpl implements TeacherService {
     public void deleteById(Long id) {
 
         TeacherEntity deleted = teacherRepository.findByIdOrThrow(id);
-        teacherRepository.delete(deleted);
+        deleted.setDeleted(true);
+        teacherRepository.save(deleted);
 
     }
 

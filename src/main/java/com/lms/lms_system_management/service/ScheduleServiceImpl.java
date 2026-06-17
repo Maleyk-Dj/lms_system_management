@@ -19,8 +19,6 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-
 import static com.lms.lms_system_management.dao.specification.ScheduleSpecification.*;
 
 @Service
@@ -58,10 +56,11 @@ public class ScheduleServiceImpl implements ScheduleService {
 
     @Transactional
     @Override
-    public void delete(Long id) {
+    public void deleteById(Long id) {
 
         ScheduleEntity scheduleEntity = scheduleRepository.findByIdOrThrow(id);
-        scheduleRepository.delete(scheduleEntity);
+        scheduleEntity.setDeleted(true);
+        scheduleRepository.save(scheduleEntity);
 
     }
 

@@ -161,7 +161,7 @@ class ScheduleEntityServiceImplTest {
         ScheduleEntity scheduleEntity = ScheduleEntity.builder().id(10L).build();
         when(scheduleRepository.findByIdOrThrow(10L)).thenReturn(scheduleEntity);
 
-        scheduleService.delete(10L);
+        scheduleService.deleteById(10L);
 
         verify(scheduleRepository).delete(scheduleEntity);
     }
@@ -170,7 +170,7 @@ class ScheduleEntityServiceImplTest {
     void delete_whenNotExists_shouldThrowNotFoundException() {
         when(scheduleRepository.findByIdOrThrow(99L)).thenThrow(new NotFoundException("not found"));
 
-        assertThatThrownBy(() -> scheduleService.delete(99L))
+        assertThatThrownBy(() -> scheduleService.deleteById(99L))
                 .isInstanceOf(NotFoundException.class);
         verify(scheduleRepository, never()).delete(any());
     }

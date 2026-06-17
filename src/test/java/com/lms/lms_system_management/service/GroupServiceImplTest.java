@@ -53,30 +53,30 @@ public class GroupServiceImplTest {
     // FIND BY ID
 
     @Test
-    void findById_whenExists_shouldReturnResponse() {
+    void getById_whenExists_shouldReturnResponse() {
         GroupEntity groupEntity = GroupEntity.builder().id(1L).name("Gruppa A").build();
         GroupResponse expected = new GroupResponse(1L, "Gruppa A");
 
         when(groupRepository.findByIdOrThrow(1L)).thenReturn(groupEntity);
         when(groupMapper.toResponse(groupEntity)).thenReturn(expected);
 
-        GroupResponse result = groupService.findById(1L);
+        GroupResponse result = groupService.getById(1L);
 
         assertThat(result).isEqualTo(expected);
     }
 
     @Test
-    void findById_whenNotExists_shouldThrowNotFoundException() {
+    void getById_whenNotExists_shouldThrowNotFoundException() {
         when(groupRepository.findByIdOrThrow(99L)).thenThrow(new NotFoundException("not found"));
 
-        assertThatThrownBy(() -> groupService.findById(99L))
+        assertThatThrownBy(() -> groupService.getById(99L))
                 .isInstanceOf(NotFoundException.class);
     }
 
     // FIND ALL
 
     @Test
-    void findAll_shouldReturnListOfResponses() {
+    void getAll_shouldReturnListOfResponses() {
         GroupEntity g1 = GroupEntity.builder().id(1L).name("Gruppa A").build();
         GroupEntity g2 = GroupEntity.builder().id(2L).name("Gruppa B").build();
         GroupResponse r1 = new GroupResponse(1L, "Gruppa A");
@@ -86,16 +86,16 @@ public class GroupServiceImplTest {
         when(groupMapper.toResponse(g1)).thenReturn(r1);
         when(groupMapper.toResponse(g2)).thenReturn(r2);
 
-        List<GroupResponse> result = groupService.findAll();
+        List<GroupResponse> result = groupService.getAll();
 
         assertThat(result).hasSize(2).containsExactly(r1, r2);
     }
 
     @Test
-    void findAll_whenEmpty_shouldReturnEmptyList() {
+    void getAll_whenEmpty_shouldReturnEmptyList() {
         when(groupRepository.findAll()).thenReturn(List.of());
 
-        assertThat(groupService.findAll()).isEmpty();
+        assertThat(groupService.getAll()).isEmpty();
     }
 
     // UPDATE

@@ -2,17 +2,19 @@ package com.lms.lms_system_management.model;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.SQLRestriction;
 
 import java.time.LocalDateTime;
 
 @Entity
-@Table (name = "schedules")
+@Table(name = "schedules")
 @Getter
 @Setter
 @ToString
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+@SQLRestriction("deleted=false")
 public class ScheduleEntity {
 
     @Id
@@ -20,13 +22,17 @@ public class ScheduleEntity {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn (name = "group_id", nullable = false)
+    @JoinColumn(name = "group_id", nullable = false)
     private GroupEntity groupEntity;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn (name = "course_id", nullable = false)
+    @JoinColumn(name = "course_id", nullable = false)
     private CourseEntity courseEntity;
 
-    @Column (nullable = false)
+    @Column(nullable = false)
     private LocalDateTime dateClass;
+
+    @Column(nullable = false)
+    private Boolean deleted;
+
 }

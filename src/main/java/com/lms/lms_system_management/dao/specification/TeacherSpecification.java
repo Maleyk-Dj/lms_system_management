@@ -13,6 +13,7 @@ public class TeacherSpecification {
 
     public static Specification<TeacherEntity> hasLastName(String lastName) {
         return (root, query, cb) ->
-                lastName==null ? null : cb.like(root.get("lastName"), "%" + lastName + "%");
+                lastName == null ? null : cb.like(root.get("lastName"), "%" + lastName + "%");
     }
+
 }

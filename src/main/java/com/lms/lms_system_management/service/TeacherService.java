@@ -7,8 +7,6 @@ import com.lms.lms_system_management.dto.schedule.ScheduleResponse;
 import com.lms.lms_system_management.dto.teacher.TeacherResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.transaction.annotation.Transactional;
-
 
 import java.util.List;
 
