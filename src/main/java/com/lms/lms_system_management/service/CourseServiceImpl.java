@@ -2,6 +2,7 @@ package com.lms.lms_system_management.service;
 
 import com.lms.lms_system_management.dao.CourseRepository;
 import com.lms.lms_system_management.dao.TeacherRepository;
+import com.lms.lms_system_management.dto.course.CourseFilter;
 import com.lms.lms_system_management.dto.course.NewCourseRequest;
 import com.lms.lms_system_management.dto.course.UpdateCourseRequest;
 import com.lms.lms_system_management.dto.course.CourseResponse;
@@ -10,10 +11,14 @@ import com.lms.lms_system_management.model.CourseEntity;
 import com.lms.lms_system_management.model.TeacherEntity;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
+import static com.lms.lms_system_management.dao.specification.CourseSpecification.hasName;
+import static com.lms.lms_system_management.dao.specification.CourseSpecification.hasTeacherId;
 
 @Service
 @RequiredArgsConstructor
@@ -44,12 +49,16 @@ public class CourseServiceImpl implements CourseService {
 
     @Transactional(readOnly = true)
     @Override
-    public List<CourseResponse> findAll() {
+    public Page<CourseResponse> findAll(CourseFilter filter, Pageable pageable) {
 
-        return courseRepository.findAll()
-                .stream()
-                .map(courseMapper::toResponse)
-                .toList();
+        Specification<CourseEntity> spec = Specification
+                .allOf(
+                        hasName(filter.name()),
+                        hasTeacherId(filter.teacherId())
+                );
+
+        return courseRepository.findAll(spec, pageable)
+                .map(courseMapper::toResponse);
     }
 
     @Transactional

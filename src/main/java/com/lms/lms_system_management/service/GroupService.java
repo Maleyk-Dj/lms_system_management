@@ -1,10 +1,11 @@
 package com.lms.lms_system_management.service;
 
+import com.lms.lms_system_management.dto.group.GroupFilter;
 import com.lms.lms_system_management.dto.group.NewGroupRequest;
 import com.lms.lms_system_management.dto.group.UpdateGroupRequest;
 import com.lms.lms_system_management.dto.group.GroupResponse;
-
-import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 public interface GroupService {
 
@@ -12,7 +13,7 @@ public interface GroupService {
 
     GroupResponse findById(Long id);
 
-    List<GroupResponse> findAll();
+    Page<GroupResponse> findAll(GroupFilter filter, Pageable pageable);
 
     GroupResponse update(UpdateGroupRequest updateGroupRequest, Long id);
 

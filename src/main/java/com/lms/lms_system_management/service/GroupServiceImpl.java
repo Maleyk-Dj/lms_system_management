@@ -1,6 +1,7 @@
 package com.lms.lms_system_management.service;
 
 import com.lms.lms_system_management.dao.GroupRepository;
+import com.lms.lms_system_management.dto.group.GroupFilter;
 import com.lms.lms_system_management.dto.group.NewGroupRequest;
 import com.lms.lms_system_management.dto.group.UpdateGroupRequest;
 import com.lms.lms_system_management.dto.group.GroupResponse;
@@ -8,10 +9,13 @@ import com.lms.lms_system_management.mapper.GroupMapper;
 import com.lms.lms_system_management.model.GroupEntity;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
+import static com.lms.lms_system_management.dao.specification.GroupSpecification.hasName;
 
 @Service
 @RequiredArgsConstructor
@@ -37,12 +41,15 @@ public class GroupServiceImpl implements GroupService {
 
     @Transactional(readOnly = true)
     @Override
-    public List<GroupResponse> findAll() {
+    public Page<GroupResponse> findAll(GroupFilter filter, Pageable pageable) {
 
-        return groupRepository.findAll()
-                .stream()
-                .map(groupMapper::toResponse)
-                .toList();
+        Specification<GroupEntity> spec = Specification
+                .allOf(
+                        hasName(filter.name())
+                );
+
+        return groupRepository.findAll(spec, pageable)
+                .map(groupMapper::toResponse);
     }
 
     @Transactional

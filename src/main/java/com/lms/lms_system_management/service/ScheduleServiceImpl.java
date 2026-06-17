@@ -4,6 +4,7 @@ import com.lms.lms_system_management.dao.CourseRepository;
 import com.lms.lms_system_management.dao.GroupRepository;
 import com.lms.lms_system_management.dao.ScheduleRepository;
 import com.lms.lms_system_management.dto.schedule.NewScheduleRequest;
+import com.lms.lms_system_management.dto.schedule.ScheduleFilter;
 import com.lms.lms_system_management.dto.schedule.UpdateScheduleRequest;
 import com.lms.lms_system_management.dto.schedule.ScheduleResponse;
 import com.lms.lms_system_management.mapper.ScheduleMapper;
@@ -12,10 +13,15 @@ import com.lms.lms_system_management.model.GroupEntity;
 import com.lms.lms_system_management.model.ScheduleEntity;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+
+import static com.lms.lms_system_management.dao.specification.ScheduleSpecification.*;
 
 @Service
 @RequiredArgsConstructor
@@ -61,11 +67,16 @@ public class ScheduleServiceImpl implements ScheduleService {
 
     @Transactional(readOnly = true)
     @Override
-    public List<ScheduleResponse> getScheduleByGroup(Long groupId) {
+    public Page<ScheduleResponse> getScheduleByGroup(ScheduleFilter filter, Pageable pageable) {
 
-        return scheduleRepository.findAllByGroupEntityId(groupId)
-                .stream()
-                .map(scheduleMapper::toResponse)
-                .toList();
+        Specification<ScheduleEntity> spec = Specification
+                .allOf(
+                        hasGroupId(filter.groupId()),
+                        hasDateFrom(filter.dateFrom()),
+                        hasDateTo(filter.dateTo())
+                );
+
+        return scheduleRepository.findAll(spec, pageable)
+                .map(scheduleMapper::toResponse);
     }
 }

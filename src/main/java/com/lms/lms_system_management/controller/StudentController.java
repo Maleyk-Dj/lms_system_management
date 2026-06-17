@@ -1,22 +1,17 @@
 package com.lms.lms_system_management.controller;
 
 import com.lms.lms_system_management.dto.student.NewStudentRequest;
+import com.lms.lms_system_management.dto.student.StudentFilter;
 import com.lms.lms_system_management.dto.student.UpdateStudentRequest;
 import com.lms.lms_system_management.dto.student.StudentResponse;
 import com.lms.lms_system_management.service.StudentService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -40,8 +35,8 @@ public class StudentController {
     }
 
     @GetMapping
-    public List<StudentResponse> getAll() {
-        return studentService.getAll();
+    public Page<StudentResponse> getAll(@ModelAttribute StudentFilter filter, Pageable pageable) {
+        return studentService.getAll(filter, pageable);
     }
 
     @PatchMapping("/{studentId}")

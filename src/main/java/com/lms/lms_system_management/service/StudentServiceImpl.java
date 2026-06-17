@@ -3,6 +3,7 @@ package com.lms.lms_system_management.service;
 import com.lms.lms_system_management.dao.GroupRepository;
 import com.lms.lms_system_management.dao.StudentRepository;
 import com.lms.lms_system_management.dto.student.NewStudentRequest;
+import com.lms.lms_system_management.dto.student.StudentFilter;
 import com.lms.lms_system_management.dto.student.UpdateStudentRequest;
 import com.lms.lms_system_management.dto.student.StudentResponse;
 import com.lms.lms_system_management.exception.AlreadyExistsException;
@@ -11,10 +12,15 @@ import com.lms.lms_system_management.model.GroupEntity;
 import com.lms.lms_system_management.model.StudentEntity;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
+import static com.lms.lms_system_management.dao.specification.StudentSpecification.hasGroupId;
+import static com.lms.lms_system_management.dao.specification.StudentSpecification.hasFirstName;
+import static com.lms.lms_system_management.dao.specification.StudentSpecification.hasLastName;
 
 @Service
 @RequiredArgsConstructor
@@ -42,12 +48,16 @@ public class StudentServiceImpl implements StudentService {
 
     @Transactional(readOnly = true)
     @Override
-    public List<StudentResponse> getAll() {
+    public Page<StudentResponse> getAll(StudentFilter filter, Pageable pageable) {
 
-        return studentRepository.findAll()
-                .stream()
-                .map(studentMapper::toResponse)
-                .toList();
+        Specification<StudentEntity> spec =Specification
+                .allOf(
+                        hasFirstName(filter.firstName()),
+                        hasLastName(filter.lastName()),
+                        hasGroupId(filter.groupId())
+                );
+        return studentRepository.findAll(spec, pageable)
+                .map(studentMapper::toResponse);
     }
 
     @Transactional
