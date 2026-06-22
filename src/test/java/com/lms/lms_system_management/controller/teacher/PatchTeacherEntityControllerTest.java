@@ -1,14 +1,8 @@
 package com.lms.lms_system_management.controller.teacher;
 
 import com.lms.lms_system_management.TestcontainersConfiguration;
-import com.lms.lms_system_management.dao.CourseRepository;
-import com.lms.lms_system_management.dao.ScheduleRepository;
-import com.lms.lms_system_management.dao.TeacherRepository;
 import com.lms.lms_system_management.dto.teacher.UpdateTeacherRequest;
 import com.lms.lms_system_management.dto.teacher.TeacherResponse;
-import com.lms.lms_system_management.model.TeacherEntity;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -18,40 +12,20 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.test.context.jdbc.Sql;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Import(TestcontainersConfiguration.class)
+@Sql ("/sql/insert-teacher.sql")
+@Sql(value = "/sql/clean.sql",executionPhase =  Sql.ExecutionPhase.AFTER_TEST_METHOD)
 class PatchTeacherEntityControllerTest {
 
     @Autowired
     private TestRestTemplate testRestTemplate;
 
-    @Autowired
-    private TeacherRepository teacherRepository;
-    @Autowired
-    private CourseRepository courseRepository;
-    @Autowired
-    private ScheduleRepository scheduleRepository;
-
     private Long teacherId;
-
-    @BeforeEach
-    public void setup() {
-        TeacherEntity teacherEntity = new TeacherEntity();
-        teacherEntity.setFirstName("Malika");
-        teacherEntity.setLastName("Djabrailova");
-        teacherRepository.save(teacherEntity);
-        teacherId = teacherEntity.getId();
-    }
-
-    @AfterEach
-    public void tearDown() {
-        scheduleRepository.deleteAllInBatch();
-        courseRepository.deleteAllInBatch();
-        teacherRepository.deleteAllInBatch();
-    }
 
     @Test
     void updateTeacher_shouldReturn200AndUpdatedBody() {
@@ -62,7 +36,7 @@ class PatchTeacherEntityControllerTest {
                 HttpMethod.PATCH,
                 new HttpEntity<>(request),
                 TeacherResponse.class,
-                teacherId
+                1L
         );
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -70,7 +44,7 @@ class PatchTeacherEntityControllerTest {
         TeacherResponse body = response.getBody();
 
         assertThat(body).isNotNull();
-        assertThat(body.id()).isEqualTo(teacherId);
+        assertThat(body.id()).isEqualTo(1L);
         assertThat(body.firstName()).isEqualTo("Anna");
         assertThat(body.lastName()).isEqualTo("Ivanova");
     }
@@ -84,7 +58,7 @@ class PatchTeacherEntityControllerTest {
                 HttpMethod.PATCH,
                 new HttpEntity<>(request),
                 Void.class,
-                teacherId
+                1L
         );
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);

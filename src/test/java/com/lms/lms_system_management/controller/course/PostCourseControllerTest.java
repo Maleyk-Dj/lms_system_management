@@ -1,14 +1,8 @@
 package com.lms.lms_system_management.controller.course;
 
 import com.lms.lms_system_management.TestcontainersConfiguration;
-import com.lms.lms_system_management.dao.CourseRepository;
-import com.lms.lms_system_management.dao.ScheduleRepository;
-import com.lms.lms_system_management.dao.TeacherRepository;
 import com.lms.lms_system_management.dto.course.NewCourseRequest;
 import com.lms.lms_system_management.dto.course.CourseResponse;
-import com.lms.lms_system_management.model.TeacherEntity;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -18,6 +12,7 @@ import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.test.context.jdbc.Sql;
 
 import java.util.stream.Stream;
 
@@ -25,39 +20,16 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Import(TestcontainersConfiguration.class)
+@Sql("/sql/insert-teacher.sql")
+@Sql(value = "/sql/clean.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
 class PostCourseControllerTest {
 
     @Autowired
     private TestRestTemplate restTemplate;
 
-    @Autowired
-    private CourseRepository courseRepository;
-    @Autowired
-    private TeacherRepository teacherRepository;
-    @Autowired
-    private ScheduleRepository scheduleRepository;
-
-    private Long teacherId;
-
-    @BeforeEach
-    public void setup() {
-        TeacherEntity teacherEntity = new TeacherEntity();
-        teacherEntity.setFirstName("Li");
-        teacherEntity.setLastName("Dja");
-        teacherRepository.save(teacherEntity);
-        teacherId = teacherEntity.getId();
-    }
-
-    @AfterEach
-    public void tearDown() {
-        scheduleRepository.deleteAllInBatch();
-        courseRepository.deleteAllInBatch();
-        teacherRepository.deleteAllInBatch();
-    }
-
     @Test
     void createCourse_shouldReturn201AndCorrectBody() {
-        NewCourseRequest request = new NewCourseRequest("Spring", "Kurs po Spring", teacherId);
+        NewCourseRequest request = new NewCourseRequest("Spring", "Kurs po Spring", 1L);
         ResponseEntity<CourseResponse> response = restTemplate.postForEntity(
                 "/api/courses",
                 request,

@@ -1,14 +1,8 @@
 package com.lms.lms_system_management.controller.student;
 
 import com.lms.lms_system_management.TestcontainersConfiguration;
-import com.lms.lms_system_management.dao.GroupRepository;
-import com.lms.lms_system_management.dao.StudentRepository;
 import com.lms.lms_system_management.dto.student.NewStudentRequest;
 import com.lms.lms_system_management.dto.student.StudentResponse;
-import com.lms.lms_system_management.model.GroupEntity;
-import com.lms.lms_system_management.model.StudentEntity;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -18,6 +12,7 @@ import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.test.context.jdbc.Sql;
 
 import java.util.stream.Stream;
 
@@ -25,44 +20,16 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Import(TestcontainersConfiguration.class)
+@Sql("/sql/insert-student.sql")
+@Sql(value = "/sql/clean.sql",executionPhase =  Sql.ExecutionPhase.AFTER_TEST_METHOD)
 class PostStudentEntityControllerTest {
 
     @Autowired
     private TestRestTemplate restTemplate;
-    @Autowired
-    private StudentRepository studentRepository;
-    @Autowired
-    private GroupRepository groupRepository;
-
-    private Long groupId;
-
-    @BeforeEach
-    public void setUp() {
-        GroupEntity groupEntity = new GroupEntity();
-        groupEntity.setName("Gruppa A");
-        groupRepository.save(groupEntity);
-        groupId = groupEntity.getId();
-
-        GroupEntity anotherGroupEntity = new GroupEntity();
-        anotherGroupEntity.setName("Gruppa B");
-        groupRepository.save(anotherGroupEntity);
-
-        StudentEntity studentEntity = new StudentEntity();
-        studentEntity.setFirstName("Valya");
-        studentEntity.setLastName("Ivanova");
-        studentEntity.setGroupEntity(groupEntity);
-        studentRepository.save(studentEntity);
-    }
-
-    @AfterEach
-    public void tearDown() {
-        studentRepository.deleteAllInBatch();
-        groupRepository.deleteAllInBatch();
-    }
 
     @Test
     void createStudent_shouldReturn201AndCorrectBody() {
-        NewStudentRequest request = new NewStudentRequest("Petr", "Petrov", groupId);
+        NewStudentRequest request = new NewStudentRequest("Petr", "Petrov", 1L);
         ResponseEntity<StudentResponse> response = restTemplate.postForEntity(
                 "/api/students",
                 request,
@@ -75,7 +42,7 @@ class PostStudentEntityControllerTest {
         assertThat(body.id()).isNotNull();
         assertThat(body.firstName()).isEqualTo("Petr");
         assertThat(body.lastName()).isEqualTo("Petrov");
-        assertThat(body.groupId()).isEqualTo(groupId);
+        assertThat(body.groupId()).isEqualTo(1L);
     }
 
     @ParameterizedTest

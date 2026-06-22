@@ -2,10 +2,6 @@ package com.lms.lms_system_management.controller.group;
 
 import com.lms.lms_system_management.TestcontainersConfiguration;
 import com.lms.lms_system_management.dao.GroupRepository;
-import com.lms.lms_system_management.dao.StudentRepository;
-import com.lms.lms_system_management.model.GroupEntity;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -15,12 +11,14 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.test.context.jdbc.Sql;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Import(TestcontainersConfiguration.class)
+@Sql("/sql/insert-group.sql")
+@Sql(value = "/sql/clean.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
 class DeleteGroupControllerTest {
 
     @Autowired
@@ -29,27 +27,6 @@ class DeleteGroupControllerTest {
     @Autowired
     private GroupRepository groupRepository;
 
-    @Autowired
-    private StudentRepository studentRepository;
-    @Autowired
-    private JdbcTemplate jdbcTemplate;
-
-    private Long groupId;
-
-    @BeforeEach
-    public void setUp() {
-        GroupEntity groupEntity = new GroupEntity();
-        groupEntity.setName("Gruppa A");
-        groupRepository.save(groupEntity);
-        groupId = groupEntity.getId();
-    }
-
-    @AfterEach
-    public void tearDown() {
-        jdbcTemplate.execute("DELETE FROM students");
-        jdbcTemplate.execute("DELETE FROM groups");
-    }
-
     @Test
     void deleteGroup_shouldReturn204AndRemoveFromDb() {
         ResponseEntity<Void> response = restTemplate.exchange(
@@ -57,11 +34,11 @@ class DeleteGroupControllerTest {
                 HttpMethod.DELETE,
                 HttpEntity.EMPTY,
                 Void.class,
-                groupId
+                1L
         );
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
-        assertThat(groupRepository.findById(groupId)).isEmpty();
+        assertThat(groupRepository.findById(1L)).isEmpty();
     }
 
     @Test

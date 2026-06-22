@@ -1,0 +1,11 @@
+DELETE FROM schedules;
+DELETE FROM courses;
+DELETE FROM students;
+DELETE FROM groups;
+DELETE FROM teachers;
+
+ALTER SEQUENCE students_id_seq RESTART WITH 1;
+ALTER SEQUENCE groups_id_seq RESTART WITH 1;
+ALTER SEQUENCE teachers_id_seq RESTART WITH 1;
+ALTER SEQUENCE courses_id_seq RESTART WITH 1;
+ALTER SEQUENCE schedules_id_seq RESTART WITH 1;

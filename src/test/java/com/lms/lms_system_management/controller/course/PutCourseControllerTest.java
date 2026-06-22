@@ -1,15 +1,8 @@
 package com.lms.lms_system_management.controller.course;
 
 import com.lms.lms_system_management.TestcontainersConfiguration;
-import com.lms.lms_system_management.dao.CourseRepository;
-import com.lms.lms_system_management.dao.ScheduleRepository;
-import com.lms.lms_system_management.dao.TeacherRepository;
 import com.lms.lms_system_management.dto.course.UpdateCourseRequest;
 import com.lms.lms_system_management.dto.course.CourseResponse;
-import com.lms.lms_system_management.model.CourseEntity;
-import com.lms.lms_system_management.model.TeacherEntity;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -22,6 +15,7 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.test.context.jdbc.Sql;
 
 import java.util.stream.Stream;
 
@@ -29,60 +23,24 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Import(TestcontainersConfiguration.class)
+@Sql("/sql/insert-course-put.sql")
+@Sql(value = "/sql/clean.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
 public class PutCourseControllerTest {
 
     @Autowired
     private TestRestTemplate restTemplate;
 
-    @Autowired
-    private CourseRepository courseRepository;
-    @Autowired
-    private TeacherRepository teacherRepository;
-    @Autowired
-    private ScheduleRepository scheduleRepository;
-
-    private Long courseId;
-    private Long anotherTeacherId;
-
-    @BeforeEach
-    public void setup() {
-
-        TeacherEntity teacherEntity = new TeacherEntity();
-        teacherEntity.setFirstName("Li");
-        teacherEntity.setLastName("Dja");
-        teacherRepository.save(teacherEntity);
-
-        TeacherEntity anotherTeacherEntity = new TeacherEntity();
-        anotherTeacherEntity.setFirstName("Ira");
-        anotherTeacherEntity.setLastName("Varnava");
-        teacherRepository.save(anotherTeacherEntity);
-        anotherTeacherId = anotherTeacherEntity.getId();
-
-        CourseEntity courseEntity = new CourseEntity();
-        courseEntity.setName("Java");
-        courseEntity.setDescription("Kurs po razrabotke Java");
-        courseEntity.setTeacherEntity(teacherEntity);
-        courseRepository.save(courseEntity);
-        courseId = courseEntity.getId();
-    }
-
-    @AfterEach
-    public void tearDown() {
-        scheduleRepository.deleteAllInBatch();
-        courseRepository.deleteAllInBatch();
-        teacherRepository.deleteAllInBatch();
-    }
     @Test
     void updateCourse_shouldReturn200AndUpdatedBody() {
         UpdateCourseRequest request = new UpdateCourseRequest(
-                "Kotlin", "Kurs po Kotlin", anotherTeacherId);
+                "Kotlin", "Kurs po Kotlin", 2L);
 
         ResponseEntity<CourseResponse> response = restTemplate.exchange(
                 "/api/courses/{id}",
                 HttpMethod.PUT,
                 new HttpEntity<>(request),
                 CourseResponse.class,
-                courseId
+                1L
         );
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -90,16 +48,15 @@ public class PutCourseControllerTest {
         CourseResponse body = response.getBody();
 
         assertThat(body).isNotNull();
-        assertThat(body.id()).isEqualTo(courseId);
+        assertThat(body.id()).isEqualTo(1L);
         assertThat(body.name()).isEqualTo("Kotlin");
         assertThat(body.description()).isEqualTo("Kurs po Kotlin");
-        assertThat(body.teacher().id()).isEqualTo(anotherTeacherId);
+        assertThat(body.teacher().id()).isEqualTo(2L);
     }
 
     @ParameterizedTest
     @MethodSource("invalidUpdateCourseRequests")
     void updateCourse_withInvalidBody_shouldReturn400(UpdateCourseRequest request) {
-
         ResponseEntity<Void> response = restTemplate.exchange(
                 "/api/courses/{id}",
                 HttpMethod.PUT,
@@ -119,9 +76,8 @@ public class PutCourseControllerTest {
     }
 
     @ParameterizedTest
-    @MethodSource ("notFoundUpdateCourseArgs")
+    @MethodSource("notFoundUpdateCourseArgs")
     void updateCourse_whenNotExists_shouldReturn404(UpdateCourseRequest request, Long courseId) {
-
         ResponseEntity<Void> response = restTemplate.exchange(
                 "/api/courses/{id}",
                 HttpMethod.PUT,
@@ -136,7 +92,7 @@ public class PutCourseControllerTest {
     static Stream<Arguments> notFoundUpdateCourseArgs() {
         return Stream.of(
                 Arguments.of(new UpdateCourseRequest("Spring", "Desc", 99999L), 88888L),
-                Arguments.of(new UpdateCourseRequest("Spring", "Desc", 1L), 99999L
-                ));
+                Arguments.of(new UpdateCourseRequest("Spring", "Desc", 1L), 99999L)
+        );
     }
 }
