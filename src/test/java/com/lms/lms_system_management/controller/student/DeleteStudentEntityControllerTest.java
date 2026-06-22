@@ -16,6 +16,7 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
@@ -28,34 +29,33 @@ class DeleteStudentEntityControllerTest {
     private StudentRepository studentRepository;
     @Autowired
     private GroupRepository groupRepository;
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
 
     private Long studentId;
 
     @BeforeEach
     public void setUp() {
-        GroupEntity groupEntity = GroupEntity.builder().
-                name("Gruppa A")
-                .build();
+        GroupEntity groupEntity = new GroupEntity();
+        groupEntity.setName("Gruppa A");
         groupRepository.save(groupEntity);
 
-        GroupEntity anotherGroupEntity = GroupEntity.builder().
-                name("Gruppa B")
-                .build();
+        GroupEntity anotherGroupEntity = new GroupEntity();
+        anotherGroupEntity.setName("Gruppa B");
         groupRepository.save(anotherGroupEntity);
 
-        StudentEntity studentEntity = StudentEntity.builder()
-                .firstName("Valya")
-                .lastName("Ivanova")
-                .groupEntity(groupEntity)
-                .build();
+        StudentEntity studentEntity = new StudentEntity();
+        studentEntity.setFirstName("Valya");
+        studentEntity.setLastName("Ivanova");
+        studentEntity.setGroupEntity(groupEntity);
         studentRepository.save(studentEntity);
         studentId = studentEntity.getId();
     }
 
     @AfterEach
     public void tearDown() {
-        studentRepository.deleteAll();
-        groupRepository.deleteAll();
+        jdbcTemplate.execute("DELETE FROM students");
+        jdbcTemplate.execute("DELETE FROM groups");
     }
 
     @Test

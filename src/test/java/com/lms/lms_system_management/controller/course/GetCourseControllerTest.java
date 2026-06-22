@@ -2,6 +2,7 @@ package com.lms.lms_system_management.controller.course;
 
 import com.lms.lms_system_management.TestcontainersConfiguration;
 import com.lms.lms_system_management.dao.CourseRepository;
+import com.lms.lms_system_management.dao.ScheduleRepository;
 import com.lms.lms_system_management.dao.TeacherRepository;
 import com.lms.lms_system_management.dto.course.CourseResponse;
 import com.lms.lms_system_management.model.CourseEntity;
@@ -28,33 +29,35 @@ class GetCourseControllerTest {
     private CourseRepository courseRepository;
     @Autowired
     private TeacherRepository teacherRepository;
+    @Autowired
+    private ScheduleRepository scheduleRepository;
 
     private Long courseId;
     private Long teacherId;
 
     @BeforeEach
     public void setup() {
-        TeacherEntity teacherEntity = TeacherEntity.builder()
-                .firstName("Li")
-                .lastName("Dja").
-                build();
+        TeacherEntity teacherEntity = new TeacherEntity();
+        teacherEntity.setFirstName("Li");
+        teacherEntity.setLastName("Dja");
         teacherRepository.save(teacherEntity);
         teacherId = teacherEntity.getId();
 
-        CourseEntity courseEntity = CourseEntity.builder()
-                .name("Java")
-                .description("Kurs po razrabotke Java")
-                .teacherEntity(teacherEntity)
-                .build();
+        CourseEntity courseEntity = new CourseEntity();
+        courseEntity.setName("Java");
+        courseEntity.setDescription("Kurs po razrabotke Java");
+        courseEntity.setTeacherEntity(teacherEntity);
         courseRepository.save(courseEntity);
         courseId = courseEntity.getId();
     }
 
     @AfterEach
     public void tearDown() {
-        courseRepository.deleteAll();
-        teacherRepository.deleteAll();
+        scheduleRepository.deleteAllInBatch();
+        courseRepository.deleteAllInBatch();
+        teacherRepository.deleteAllInBatch();
     }
+
     @Test
     void getCourseById_shouldReturn200AndCorrectBody() {
         ResponseEntity<CourseResponse> response = restTemplate.getForEntity(
@@ -85,17 +88,14 @@ class GetCourseControllerTest {
     }
 
     @Test
-    void getAllCourses_shouldReturn200AndNonEmptyList() {
-        ResponseEntity<CourseResponse[]> response = restTemplate.getForEntity(
+    void getAllCourses_shouldReturn200AndNonEmptyContent() {
+        ResponseEntity<String> response = restTemplate.getForEntity(
                 "/api/courses",
-                CourseResponse[].class
+                String.class
         );
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-
-        CourseResponse[] body = response.getBody();
-
-        assertThat(body).isNotNull();
-        assertThat(body.length).isGreaterThan(0);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody()).contains("Java");
     }
 }

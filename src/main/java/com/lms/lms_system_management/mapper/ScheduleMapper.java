@@ -15,6 +15,7 @@ public interface ScheduleMapper {
     @Mapping(target = "groupEntity", source = "groupEntity")
     @Mapping(target = "courseEntity", source = "courseEntity")
     @Mapping(source = "newScheduleRequest.date", target = "dateClass")
+    @Mapping(target = "deleted", ignore = true)
     ScheduleEntity toEntity(NewScheduleRequest newScheduleRequest, GroupEntity groupEntity,
                             CourseEntity courseEntity);
 
@@ -27,6 +28,7 @@ public interface ScheduleMapper {
     @Mapping(target = "groupEntity", source = "groupEntity")
     @Mapping(target = "courseEntity", source = "courseEntity")
     @Mapping(source = "request.date", target = "dateClass")
+    @Mapping(target = "deleted", ignore = true)
     void updateSchedule(UpdateScheduleRequest request, GroupEntity groupEntity,
                         CourseEntity courseEntity, @MappingTarget ScheduleEntity scheduleEntity);
 }

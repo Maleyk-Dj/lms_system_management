@@ -4,6 +4,7 @@ import com.lms.lms_system_management.dao.CourseRepository;
 import com.lms.lms_system_management.dao.GroupRepository;
 import com.lms.lms_system_management.dao.ScheduleRepository;
 import com.lms.lms_system_management.dto.schedule.NewScheduleRequest;
+import com.lms.lms_system_management.dto.schedule.ScheduleFilter;
 import com.lms.lms_system_management.dto.schedule.UpdateScheduleRequest;
 import com.lms.lms_system_management.dto.schedule.ScheduleResponse;
 import com.lms.lms_system_management.exception.NotFoundException;
@@ -16,12 +17,17 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -48,10 +54,20 @@ class ScheduleEntityServiceImplTest {
 
     @Test
     void assignCourseTime_whenGroupAndCourseExist_shouldSaveAndReturnResponse() {
-        GroupEntity groupEntity = GroupEntity.builder().id(1L).build();
-        CourseEntity courseEntity = CourseEntity.builder().id(1L).build();
+        GroupEntity groupEntity = new GroupEntity();
+        groupEntity.setId(1L);
+
+        CourseEntity courseEntity = new CourseEntity();
+        courseEntity.setId(1L);
+
         NewScheduleRequest request = new NewScheduleRequest(1L, 1L, DATE);
-        ScheduleEntity entity = ScheduleEntity.builder().id(1L).groupEntity(groupEntity).courseEntity(courseEntity).dateClass(DATE).build();
+
+        ScheduleEntity entity = new ScheduleEntity();
+        entity.setId(1L);
+        entity.setGroupEntity(groupEntity);
+        entity.setCourseEntity(courseEntity);
+        entity.setDateClass(DATE);
+
         ScheduleResponse expected = new ScheduleResponse(1L, null, null, DATE);
 
         when(groupRepository.findByIdOrThrow(1L)).thenReturn(groupEntity);
@@ -78,7 +94,9 @@ class ScheduleEntityServiceImplTest {
 
     @Test
     void assignCourseTime_whenCourseNotExists_shouldThrowNotFoundException() {
-        GroupEntity groupEntity = GroupEntity.builder().id(1L).build();
+        GroupEntity groupEntity = new GroupEntity();
+        groupEntity.setId(1L);
+
         NewScheduleRequest request = new NewScheduleRequest(1L, 99L, DATE);
 
         when(groupRepository.findByIdOrThrow(1L)).thenReturn(groupEntity);
@@ -93,12 +111,27 @@ class ScheduleEntityServiceImplTest {
 
     @Test
     void update_whenAllExist_shouldUpdateAndReturnResponse() {
-        GroupEntity groupEntity = GroupEntity.builder().id(1L).build();
-        CourseEntity courseEntity = CourseEntity.builder().id(1L).build();
-        ScheduleEntity scheduleEntity = ScheduleEntity.builder().id(10L).groupEntity(groupEntity).courseEntity(courseEntity).dateClass(DATE).build();
+        GroupEntity groupEntity = new GroupEntity();
+        groupEntity.setId(1L);
+
+        CourseEntity courseEntity = new CourseEntity();
+        courseEntity.setId(1L);
+
+        ScheduleEntity scheduleEntity = new ScheduleEntity();
+        scheduleEntity.setId(10L);
+        scheduleEntity.setGroupEntity(groupEntity);
+        scheduleEntity.setCourseEntity(courseEntity);
+        scheduleEntity.setDateClass(DATE);
+
         LocalDateTime newDate = LocalDateTime.of(2025, 10, 1, 12, 0);
         UpdateScheduleRequest request = new UpdateScheduleRequest(1L, 1L, newDate);
-        ScheduleEntity saved = ScheduleEntity.builder().id(10L).groupEntity(groupEntity).courseEntity(courseEntity).dateClass(newDate).build();
+
+        ScheduleEntity saved = new ScheduleEntity();
+        saved.setId(10L);
+        saved.setGroupEntity(groupEntity);
+        saved.setCourseEntity(courseEntity);
+        saved.setDateClass(newDate);
+
         ScheduleResponse expected = new ScheduleResponse(10L, null, null, newDate);
 
         when(scheduleRepository.findByIdOrThrow(10L)).thenReturn(scheduleEntity);
@@ -125,9 +158,18 @@ class ScheduleEntityServiceImplTest {
 
     @Test
     void update_whenGroupNotExists_shouldThrowNotFoundException() {
-        GroupEntity groupEntity = GroupEntity.builder().id(1L).build();
-        CourseEntity courseEntity = CourseEntity.builder().id(1L).build();
-        ScheduleEntity scheduleEntity = ScheduleEntity.builder().id(10L).groupEntity(groupEntity).courseEntity(courseEntity).dateClass(DATE).build();
+        GroupEntity groupEntity = new GroupEntity();
+        groupEntity.setId(1L);
+
+        CourseEntity courseEntity = new CourseEntity();
+        courseEntity.setId(1L);
+
+        ScheduleEntity scheduleEntity = new ScheduleEntity();
+        scheduleEntity.setId(10L);
+        scheduleEntity.setGroupEntity(groupEntity);
+        scheduleEntity.setCourseEntity(courseEntity);
+        scheduleEntity.setDateClass(DATE);
+
         UpdateScheduleRequest request = new UpdateScheduleRequest(99L, 1L, DATE);
 
         when(scheduleRepository.findByIdOrThrow(10L)).thenReturn(scheduleEntity);
@@ -140,9 +182,18 @@ class ScheduleEntityServiceImplTest {
 
     @Test
     void update_whenCourseNotExists_shouldThrowNotFoundException() {
-        GroupEntity groupEntity = GroupEntity.builder().id(1L).build();
-        CourseEntity courseEntity = CourseEntity.builder().id(1L).build();
-        ScheduleEntity scheduleEntity = ScheduleEntity.builder().id(10L).groupEntity(groupEntity).courseEntity(courseEntity).dateClass(DATE).build();
+        GroupEntity groupEntity = new GroupEntity();
+        groupEntity.setId(1L);
+
+        CourseEntity courseEntity = new CourseEntity();
+        courseEntity.setId(1L);
+
+        ScheduleEntity scheduleEntity = new ScheduleEntity();
+        scheduleEntity.setId(10L);
+        scheduleEntity.setGroupEntity(groupEntity);
+        scheduleEntity.setCourseEntity(courseEntity);
+        scheduleEntity.setDateClass(DATE);
+
         UpdateScheduleRequest request = new UpdateScheduleRequest(1L, 99L, DATE);
 
         when(scheduleRepository.findByIdOrThrow(10L)).thenReturn(scheduleEntity);
@@ -158,59 +209,63 @@ class ScheduleEntityServiceImplTest {
 
     @Test
     void delete_whenExists_shouldDelete() {
-        ScheduleEntity scheduleEntity = ScheduleEntity.builder().id(10L).build();
-        when(scheduleRepository.findByIdOrThrow(10L)).thenReturn(scheduleEntity);
+        when(scheduleRepository.softDeleteById(10L)).thenReturn(1);
 
         scheduleService.deleteById(10L);
 
-        verify(scheduleRepository).delete(scheduleEntity);
+        verify(scheduleRepository).softDeleteById(10L);
     }
 
     @Test
     void delete_whenNotExists_shouldThrowNotFoundException() {
-        when(scheduleRepository.findByIdOrThrow(99L)).thenThrow(new NotFoundException("not found"));
+        when(scheduleRepository.softDeleteById(99L)).thenReturn(0);
 
         assertThatThrownBy(() -> scheduleService.deleteById(99L))
                 .isInstanceOf(NotFoundException.class);
-        verify(scheduleRepository, never()).delete(any());
+        verify(scheduleRepository, never()).delete(any(ScheduleEntity.class));
     }
 
     // GET SCHEDULE BY GROUP
 
     @Test
-    void getScheduleByGroup_shouldReturnSchedulesForGroup() {
-        GroupEntity groupEntity = GroupEntity.builder().id(1L).build();
-        ScheduleEntity s1 = ScheduleEntity.builder().id(1L).groupEntity(groupEntity).dateClass(DATE).build();
-        ScheduleEntity s2 = ScheduleEntity.builder().id(2L).groupEntity(groupEntity).dateClass(DATE.plusDays(1)).build();
+    void getScheduleByGroup_shouldReturnPagedSchedules() {
+        ScheduleFilter filter = new ScheduleFilter(1L, null, null);
+        Pageable pageable = PageRequest.of(0, 10);
+
+        GroupEntity groupEntity = new GroupEntity();
+        groupEntity.setId(1L);
+
+        ScheduleEntity s1 = new ScheduleEntity();
+        s1.setId(1L);
+        s1.setGroupEntity(groupEntity);
+        s1.setDateClass(DATE);
+
+        ScheduleEntity s2 = new ScheduleEntity();
+        s2.setId(2L);
+        s2.setGroupEntity(groupEntity);
+        s2.setDateClass(DATE.plusDays(1));
+
         ScheduleResponse r1 = new ScheduleResponse(1L, null, null, DATE);
         ScheduleResponse r2 = new ScheduleResponse(2L, null, null, DATE.plusDays(1));
 
-        when(groupRepository.findByIdOrThrow(1L)).thenReturn(groupEntity);
-        when(scheduleRepository.findAllByGroupEntityId(1L)).thenReturn(List.of(s1, s2));
+        when(scheduleRepository.findAll(any(Specification.class), eq(pageable)))
+                .thenReturn(new PageImpl<>(List.of(s1, s2)));
         when(scheduleMapper.toResponse(s1)).thenReturn(r1);
         when(scheduleMapper.toResponse(s2)).thenReturn(r2);
 
-        List<ScheduleResponse> result = scheduleService.getScheduleByGroup(1L);
+        Page<ScheduleResponse> result = scheduleService.getScheduleByGroup(filter, pageable);
 
-        assertThat(result.size()).isEqualTo(2);
+        assertThat(result.getContent()).hasSize(2).containsExactly(r1, r2);
     }
 
     @Test
-    void getScheduleByGroup_whenGroupNotExists_shouldThrowNotFoundException() {
-        when(groupRepository.findByIdOrThrow(99L)).thenThrow(new NotFoundException("not found"));
+    void getScheduleByGroup_whenNoSchedules_shouldReturnEmptyPage() {
+        ScheduleFilter filter = new ScheduleFilter(1L, null, null);
+        Pageable pageable = PageRequest.of(0, 10);
 
-        assertThatThrownBy(() -> scheduleService.getScheduleByGroup(99L))
-                .isInstanceOf(NotFoundException.class);
-    }
+        when(scheduleRepository.findAll(any(Specification.class), eq(pageable)))
+                .thenReturn(new PageImpl<>(List.of()));
 
-    @Test
-    void getScheduleByGroup_whenNoSchedules_shouldReturnEmptyList() {
-        GroupEntity groupEntity = GroupEntity.builder().id(1L).build();
-        when(groupRepository.findByIdOrThrow(1L)).thenReturn(groupEntity);
-        when(scheduleRepository.findAllByGroupEntityId(1L)).thenReturn(List.of());
-
-        List<ScheduleResponse> result = scheduleService.getScheduleByGroup(1L);
-
-        assertThat(result.size()).isEqualTo(0);
+        assertThat(scheduleService.getScheduleByGroup(filter, pageable).getContent()).isEmpty();
     }
 }

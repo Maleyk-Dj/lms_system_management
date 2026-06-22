@@ -1,23 +1,33 @@
 package com.lms.lms_system_management.dao.specification;
 
+import com.lms.lms_system_management.dto.student.StudentFilter;
+import com.lms.lms_system_management.model.GroupEntity_;
 import com.lms.lms_system_management.model.StudentEntity;
+import com.lms.lms_system_management.model.StudentEntity_;
+import jakarta.persistence.criteria.Predicate;
 import org.springframework.data.jpa.domain.Specification;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import static java.util.Optional.ofNullable;
 
 public class StudentSpecification {
 
-    public static Specification<StudentEntity> hasFirstName(String firstName) {
+    public static Specification<StudentEntity> build(StudentFilter filter) {
+        return (root, query, cb) -> {
+            List<Predicate> predicates = new ArrayList<>();
 
-        return (root, query, cb) ->
-                firstName == null ? null : cb.like(root.get("firstName"), "%" + firstName + "%");
-    }
+            ofNullable(filter.firstName()).ifPresent(firstName ->
+                    predicates.add(cb.like(root.get(StudentEntity_.firstName), "%" + firstName + "%")));
 
-    public static Specification<StudentEntity> hasLastName(String lastName) {
-        return ((root, query, criteriaBuilder) ->
-                lastName == null ? null : criteriaBuilder.like(root.get("lastName"), "%" + lastName + "%"));
-    }
+            ofNullable(filter.lastName()).ifPresent(lastName ->
+                    predicates.add(cb.like(root.get(StudentEntity_.lastName), "%" + lastName + "%")));
 
-    public static Specification<StudentEntity> hasGroupId(Long groupId) {
-        return (root, query, cb) ->
-                groupId == null ? null : cb.equal(root.get("groupEntity").get("id"), groupId);
+            ofNullable(filter.groupId()).ifPresent(groupId ->
+                    predicates.add(cb.equal(root.get(StudentEntity_.groupEntity).get(GroupEntity_.id), groupId)));
+
+            return cb.and(predicates.toArray(new Predicate[0]));
+        };
     }
 }

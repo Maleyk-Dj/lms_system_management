@@ -38,29 +38,26 @@ class PostStudentEntityControllerTest {
 
     @BeforeEach
     public void setUp() {
-        GroupEntity groupEntity = GroupEntity.builder().
-                name("Gruppa A")
-                .build();
+        GroupEntity groupEntity = new GroupEntity();
+        groupEntity.setName("Gruppa A");
         groupRepository.save(groupEntity);
         groupId = groupEntity.getId();
 
-        GroupEntity anotherGroupEntity = GroupEntity.builder().
-                name("Gruppa B")
-                .build();
+        GroupEntity anotherGroupEntity = new GroupEntity();
+        anotherGroupEntity.setName("Gruppa B");
         groupRepository.save(anotherGroupEntity);
 
-        StudentEntity studentEntity = StudentEntity.builder()
-                .firstName("Valya")
-                .lastName("Ivanova")
-                .groupEntity(groupEntity)
-                .build();
+        StudentEntity studentEntity = new StudentEntity();
+        studentEntity.setFirstName("Valya");
+        studentEntity.setLastName("Ivanova");
+        studentEntity.setGroupEntity(groupEntity);
         studentRepository.save(studentEntity);
     }
 
     @AfterEach
     public void tearDown() {
-        studentRepository.deleteAll();
-        groupRepository.deleteAll();
+        studentRepository.deleteAllInBatch();
+        groupRepository.deleteAllInBatch();
     }
 
     @Test

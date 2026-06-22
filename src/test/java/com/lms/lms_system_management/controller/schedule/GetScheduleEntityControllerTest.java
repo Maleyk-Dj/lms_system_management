@@ -5,7 +5,6 @@ import com.lms.lms_system_management.dao.CourseRepository;
 import com.lms.lms_system_management.dao.GroupRepository;
 import com.lms.lms_system_management.dao.ScheduleRepository;
 import com.lms.lms_system_management.dao.TeacherRepository;
-import com.lms.lms_system_management.dto.schedule.ScheduleResponse;
 import com.lms.lms_system_management.model.CourseEntity;
 import com.lms.lms_system_management.model.GroupEntity;
 import com.lms.lms_system_management.model.ScheduleEntity;
@@ -43,86 +42,75 @@ class GetScheduleEntityControllerTest {
 
     @BeforeEach
     public void setUp() {
-        TeacherEntity teacherEntity = TeacherEntity.builder()
-                .firstName("Ivan")
-                .lastName("Petrov")
-                .build();
+        TeacherEntity teacherEntity = new TeacherEntity();
+        teacherEntity.setFirstName("Malika");
+        teacherEntity.setLastName("Djabrailova");
         teacherRepository.save(teacherEntity);
 
-        GroupEntity groupEntity = GroupEntity.builder()
-                .name("Gruppa A")
-                .build();
+        GroupEntity groupEntity = new GroupEntity();
+        groupEntity.setName("Gruppa A");
         groupRepository.save(groupEntity);
-        groupId = groupEntity.getId();
 
-        CourseEntity courseEntity = CourseEntity.builder()
-                .name("Java")
-                .description("Kurs po Java")
-                .teacherEntity(teacherEntity)
-                .build();
+        CourseEntity courseEntity = new CourseEntity();
+        courseEntity.setName("Java");
+        courseEntity.setDescription("Kurs po Java");
+        courseEntity.setTeacherEntity(teacherEntity);
         courseRepository.save(courseEntity);
 
         LocalDateTime scheduleDate = LocalDateTime.of(2026, 7, 1, 10, 0);
 
-        ScheduleEntity scheduleEntity = ScheduleEntity.builder()
-                .groupEntity(groupEntity)
-                .courseEntity(courseEntity)
-                .dateClass(scheduleDate)
-                .build();
+        ScheduleEntity scheduleEntity = new ScheduleEntity();
+        scheduleEntity.setGroupEntity(groupEntity);
+        scheduleEntity.setCourseEntity(courseEntity);
+        scheduleEntity.setDateClass(scheduleDate);
         scheduleRepository.save(scheduleEntity);
     }
 
     @AfterEach
     public void tearDown() {
-        scheduleRepository.deleteAll();
-        courseRepository.deleteAll();
-        groupRepository.deleteAll();
-        teacherRepository.deleteAll();
+        scheduleRepository.deleteAllInBatch();
+        courseRepository.deleteAllInBatch();
+        groupRepository.deleteAllInBatch();
+        teacherRepository.deleteAllInBatch();
     }
+
     @Test
-    void getScheduleByGroup_shouldReturn200AndNonEmptyList() {
-        ResponseEntity<ScheduleResponse[]> response = restTemplate.getForEntity(
-                "/api/schedules/groups/{groupId}",
-                ScheduleResponse[].class,
+    void getScheduleByGroup_shouldReturn200AndNonEmptyBody() {
+        ResponseEntity<String> response = restTemplate.getForEntity(
+                "/api/schedules?groupId={groupId}",
+                String.class,
                 groupId
         );
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-
-        ScheduleResponse[] body = response.getBody();
-
-        assertThat(body).isNotNull();
-        assertThat(body.length).isGreaterThan(0);
-        assertThat(body[0].group().id()).isEqualTo(groupId);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody()).contains("\"totalElements\":1");
     }
 
     @Test
-    void getScheduleByGroup_whenGroupNotExists_shouldReturn404() {
-        ResponseEntity<Void> response = restTemplate.getForEntity(
-                "/api/schedules/groups/{groupId}",
-                Void.class,
-                99999L
+    void getScheduleByGroup_whenUnknownGroup_shouldReturn200AndEmptyContent() {
+        ResponseEntity<String> response = restTemplate.getForEntity(
+                "/api/schedules?groupId=99999",
+                String.class
         );
 
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody()).contains("\"totalElements\":0");
     }
 
     @Test
-    void getScheduleByGroup_whenNoSchedules_shouldReturn200AndEmptyList() {
-        GroupEntity emptyGroupEntity = GroupEntity.builder().name("Gruppa B").build();
+    void getScheduleByGroup_whenNoSchedules_shouldReturn200AndEmptyContent() {
+        GroupEntity emptyGroupEntity = new GroupEntity();
+        emptyGroupEntity.setName("Gruppa B");
         groupRepository.save(emptyGroupEntity);
 
-        ResponseEntity<ScheduleResponse[]> response = restTemplate.getForEntity(
-                "/api/schedules/groups/{groupId}",
-                ScheduleResponse[].class,
+        ResponseEntity<String> response = restTemplate.getForEntity(
+                "/api/schedules?groupId={groupId}",
+                String.class,
                 emptyGroupEntity.getId()
         );
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-
-        ScheduleResponse[] body = response.getBody();
-
-        assertThat(body).isNotNull();
-        assertThat(body.length).isEqualTo(0);
+        assertThat(response.getBody()).contains("\"totalElements\":0");
     }
 }

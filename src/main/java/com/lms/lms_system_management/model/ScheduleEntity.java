@@ -13,7 +13,6 @@ import java.time.LocalDateTime;
 @ToString
 @AllArgsConstructor
 @NoArgsConstructor
-@Builder
 @SQLRestriction("deleted=false")
 public class ScheduleEntity {
 
@@ -33,6 +32,6 @@ public class ScheduleEntity {
     private LocalDateTime dateClass;
 
     @Column(nullable = false)
-    private Boolean deleted;
+    private Boolean deleted = false;
 
 }

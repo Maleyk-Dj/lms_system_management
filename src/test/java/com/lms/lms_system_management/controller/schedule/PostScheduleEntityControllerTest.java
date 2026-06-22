@@ -22,6 +22,7 @@ import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.time.LocalDateTime;
 import java.util.stream.Stream;
@@ -43,48 +44,38 @@ class PostScheduleEntityControllerTest {
     private CourseRepository courseRepository;
     @Autowired
     private TeacherRepository teacherRepository;
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
 
     private Long groupId;
     private Long courseId;
 
     @BeforeEach
     public void setUp() {
-        TeacherEntity teacherEntity = TeacherEntity.builder()
-                .firstName("Ivan")
-                .lastName("Petrov")
-                .build();
+        TeacherEntity teacherEntity = new TeacherEntity();
+        teacherEntity.setFirstName("Malika");
+        teacherEntity.setLastName("Djabrailova");
         teacherRepository.save(teacherEntity);
 
-        GroupEntity groupEntity = GroupEntity.builder()
-                .name("Gruppa A")
-                .build();
+        GroupEntity groupEntity = new GroupEntity();
+        groupEntity.setName("Gruppa A");
         groupRepository.save(groupEntity);
         groupId = groupEntity.getId();
 
-        CourseEntity courseEntity = CourseEntity.builder()
-                .name("Java")
-                .description("Kurs po Java")
-                .teacherEntity(teacherEntity)
-                .build();
+        CourseEntity courseEntity = new CourseEntity();
+        courseEntity.setName("Java");
+        courseEntity.setDescription("Kurs po Java");
+        courseEntity.setTeacherEntity(teacherEntity);
         courseRepository.save(courseEntity);
         courseId = courseEntity.getId();
-
-        LocalDateTime scheduleDate = LocalDateTime.of(2026, 7, 1, 10, 0);
-
-        ScheduleEntity scheduleEntity = ScheduleEntity.builder()
-                .groupEntity(groupEntity)
-                .courseEntity(courseEntity)
-                .dateClass(scheduleDate)
-                .build();
-        scheduleRepository.save(scheduleEntity);
     }
 
     @AfterEach
     public void tearDown() {
-        scheduleRepository.deleteAll();
-        courseRepository.deleteAll();
-        groupRepository.deleteAll();
-        teacherRepository.deleteAll();
+        jdbcTemplate.execute("DELETE FROM schedules");
+        jdbcTemplate.execute("DELETE FROM courses");
+        jdbcTemplate.execute("DELETE FROM groups");
+        jdbcTemplate.execute("DELETE FROM teachers");
     }
 
     @Test

@@ -33,30 +33,27 @@ class GetStudentEntityControllerTest {
 
     @BeforeEach
     public void setUp() {
-        GroupEntity groupEntity = GroupEntity.builder().
-                name("Gruppa A")
-                .build();
+        GroupEntity groupEntity = new GroupEntity();
+        groupEntity.setName("Gruppa A");
         groupRepository.save(groupEntity);
         groupId = groupEntity.getId();
 
-        GroupEntity anotherGroupEntity = GroupEntity.builder().
-                name("Gruppa B")
-                .build();
+        GroupEntity anotherGroupEntity = new GroupEntity();
+        anotherGroupEntity.setName("Gruppa B");
         groupRepository.save(anotherGroupEntity);
 
-        StudentEntity studentEntity = StudentEntity.builder()
-                .firstName("Valya")
-                .lastName("Ivanova")
-                .groupEntity(groupEntity)
-                .build();
+        StudentEntity studentEntity = new StudentEntity();
+        studentEntity.setFirstName("Valya");
+        studentEntity.setLastName("Ivanova");
+        studentEntity.setGroupEntity(groupEntity);
         studentRepository.save(studentEntity);
         studentId = studentEntity.getId();
     }
 
     @AfterEach
     public void tearDown() {
-        studentRepository.deleteAll();
-        groupRepository.deleteAll();
+        studentRepository.deleteAllInBatch();
+        groupRepository.deleteAllInBatch();
     }
     @Test
     void getStudentById_shouldReturn200AndCorrectBody() {
@@ -85,14 +82,13 @@ class GetStudentEntityControllerTest {
     }
 
     @Test
-    void getAllStudents_shouldReturn200AndNonEmptyList() {
-        ResponseEntity<StudentResponse[]> response = restTemplate.getForEntity(
-                "/api/students"
-                , StudentResponse[].class
+    void getAllStudents_shouldReturn200AndNonEmptyContent() {
+        ResponseEntity<String> response = restTemplate.getForEntity(
+                "/api/students",
+                String.class
         );
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-        StudentResponse[] body = response.getBody();
-        assertThat(body).isNotNull();
-        assertThat(body.length).isGreaterThan(0);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody()).contains("Valya");
     }
 }

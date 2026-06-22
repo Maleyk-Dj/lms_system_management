@@ -2,6 +2,7 @@ package com.lms.lms_system_management.controller.course;
 
 import com.lms.lms_system_management.TestcontainersConfiguration;
 import com.lms.lms_system_management.dao.CourseRepository;
+import com.lms.lms_system_management.dao.ScheduleRepository;
 import com.lms.lms_system_management.dao.TeacherRepository;
 import com.lms.lms_system_management.model.CourseEntity;
 import com.lms.lms_system_management.model.TeacherEntity;
@@ -16,6 +17,7 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
@@ -30,31 +32,33 @@ class DeleteCourseControllerTest {
     private CourseRepository courseRepository;
     @Autowired
     private TeacherRepository teacherRepository;
+    @Autowired
+    private ScheduleRepository scheduleRepository;
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
 
     private Long courseId;
 
     @BeforeEach
     public void setup() {
-
-        TeacherEntity teacherEntity = TeacherEntity.builder()
-                .firstName("Li")
-                .lastName("Dja")
-                .build();
+        TeacherEntity teacherEntity = new TeacherEntity();
+        teacherEntity.setFirstName("Li");
+        teacherEntity.setLastName("Dja");
         teacherRepository.save(teacherEntity);
 
-        CourseEntity courseEntity = CourseEntity.builder()
-                .name("Java")
-                .description("Kurs po razrabotke Java")
-                .teacherEntity(teacherEntity)
-                .build();
+        CourseEntity courseEntity = new CourseEntity();
+        courseEntity.setName("Java");
+        courseEntity.setDescription("Kurs po razrabotke Java");
+        courseEntity.setTeacherEntity(teacherEntity);
         courseRepository.save(courseEntity);
         courseId = courseEntity.getId();
     }
 
     @AfterEach
     public void tearDown() {
-        courseRepository.deleteAll();
-        teacherRepository.deleteAll();
+        jdbcTemplate.execute("DELETE FROM schedules");
+        jdbcTemplate.execute("DELETE FROM courses");
+        jdbcTemplate.execute("DELETE FROM teachers");
     }
 
     @Test

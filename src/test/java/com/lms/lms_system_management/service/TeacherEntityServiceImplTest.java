@@ -52,8 +52,16 @@ class TeacherEntityServiceImplTest {
     @Test
     void create_shouldSaveAndReturnResponse() {
         NewTeacherRequest request = new NewTeacherRequest("Ivan", "Petrov");
-        TeacherEntity entity = TeacherEntity.builder().firstName("Ivan").lastName("Petrov").build();
-        TeacherEntity saved = TeacherEntity.builder().id(1L).firstName("Ivan").lastName("Petrov").build();
+
+        TeacherEntity entity = new TeacherEntity();
+        entity.setFirstName("Ivan");
+        entity.setLastName("Petrov");
+
+        TeacherEntity saved = new TeacherEntity();
+        saved.setId(1L);
+        saved.setFirstName("Ivan");
+        saved.setLastName("Petrov");
+
         TeacherResponse expected = new TeacherResponse(1L, "Ivan", "Petrov");
 
         when(teacherMapper.toEntity(request)).thenReturn(entity);
@@ -70,7 +78,11 @@ class TeacherEntityServiceImplTest {
 
     @Test
     void getById_whenExists_shouldReturnResponse() {
-        TeacherEntity teacherEntity = TeacherEntity.builder().id(1L).firstName("Ivan").lastName("Petrov").build();
+        TeacherEntity teacherEntity = new TeacherEntity();
+        teacherEntity.setId(1L);
+        teacherEntity.setFirstName("Ivan");
+        teacherEntity.setLastName("Petrov");
+
         TeacherResponse expected = new TeacherResponse(1L, "Ivan", "Petrov");
 
         when(teacherRepository.findByIdOrThrow(1L)).thenReturn(teacherEntity);
@@ -90,13 +102,22 @@ class TeacherEntityServiceImplTest {
     }
 
     // GET ALL
+
     @Test
     void getAll_shouldReturnListOfResponses() {
         TeacherFilter filter = new TeacherFilter(null, null);
         Pageable pageable = PageRequest.of(0, 10);
 
-        TeacherEntity t1 = TeacherEntity.builder().id(1L).firstName("Ivan").lastName("Petrov").build();
-        TeacherEntity t2 = TeacherEntity.builder().id(2L).firstName("Anna").lastName("Ivanova").build();
+        TeacherEntity t1 = new TeacherEntity();
+        t1.setId(1L);
+        t1.setFirstName("Ivan");
+        t1.setLastName("Petrov");
+
+        TeacherEntity t2 = new TeacherEntity();
+        t2.setId(2L);
+        t2.setFirstName("Anna");
+        t2.setLastName("Ivanova");
+
         TeacherResponse r1 = new TeacherResponse(1L, "Ivan", "Petrov");
         TeacherResponse r2 = new TeacherResponse(2L, "Anna", "Ivanova");
 
@@ -120,13 +141,23 @@ class TeacherEntityServiceImplTest {
 
         assertThat(teacherService.getAll(filter, pageable).getContent()).isEmpty();
     }
+
     // UPDATE
 
     @Test
     void update_whenExists_shouldUpdateAndReturnResponse() {
         UpdateTeacherRequest request = new UpdateTeacherRequest("Anna", "Ivanova");
-        TeacherEntity teacherEntity = TeacherEntity.builder().id(1L).firstName("Ivan").lastName("Petrov").build();
-        TeacherEntity saved = TeacherEntity.builder().id(1L).firstName("Anna").lastName("Ivanova").build();
+
+        TeacherEntity teacherEntity = new TeacherEntity();
+        teacherEntity.setId(1L);
+        teacherEntity.setFirstName("Ivan");
+        teacherEntity.setLastName("Petrov");
+
+        TeacherEntity saved = new TeacherEntity();
+        saved.setId(1L);
+        saved.setFirstName("Anna");
+        saved.setLastName("Ivanova");
+
         TeacherResponse expected = new TeacherResponse(1L, "Anna", "Ivanova");
 
         when(teacherRepository.findByIdOrThrow(1L)).thenReturn(teacherEntity);
@@ -153,17 +184,16 @@ class TeacherEntityServiceImplTest {
 
     @Test
     void deleteById_whenExists_shouldDelete() {
-        TeacherEntity teacherEntity = TeacherEntity.builder().id(1L).firstName("Ivan").lastName("Petrov").build();
-        when(teacherRepository.findByIdOrThrow(1L)).thenReturn(teacherEntity);
+        when(teacherRepository.softDeletedById(1L)).thenReturn(1);
 
         teacherService.deleteById(1L);
 
-        verify(teacherRepository).delete(teacherEntity);
+        verify(teacherRepository).softDeletedById(1L);
     }
 
     @Test
     void deleteById_whenNotExists_shouldThrowNotFoundException() {
-        when(teacherRepository.findByIdOrThrow(99L)).thenThrow(new NotFoundException("not found"));
+        when(teacherRepository.softDeletedById(99L)).thenReturn(0);
 
         assertThatThrownBy(() -> teacherService.deleteById(99L))
                 .isInstanceOf(NotFoundException.class);
@@ -173,12 +203,12 @@ class TeacherEntityServiceImplTest {
     // GET SCHEDULE BY TEACHER
 
     @Test
-    void getScheduleByTeacher_whenExists_shouldReturnSchedules() {
-        TeacherEntity teacherEntity = TeacherEntity.builder().id(1L).build();
-        ScheduleEntity scheduleEntity = ScheduleEntity.builder().id(10L).build();
+    void getScheduleByTeacher_whenHasSchedules_shouldReturnList() {
+        ScheduleEntity scheduleEntity = new ScheduleEntity();
+        scheduleEntity.setId(10L);
+
         ScheduleResponse scheduleResponse = new ScheduleResponse(10L, null, null, null);
 
-        when(teacherRepository.findByIdOrThrow(1L)).thenReturn(teacherEntity);
         when(scheduleRepository.findByCourseEntityTeacherEntityId(1L)).thenReturn(List.of(scheduleEntity));
         when(scheduleMapper.toResponse(scheduleEntity)).thenReturn(scheduleResponse);
 
@@ -189,8 +219,6 @@ class TeacherEntityServiceImplTest {
 
     @Test
     void getScheduleByTeacher_whenNoSchedules_shouldReturnEmptyList() {
-        TeacherEntity teacherEntity = TeacherEntity.builder().id(1L).build();
-        when(teacherRepository.findByIdOrThrow(1L)).thenReturn(teacherEntity);
         when(scheduleRepository.findByCourseEntityTeacherEntityId(1L)).thenReturn(List.of());
 
         List<ScheduleResponse> result = teacherService.getScheduleByTeacher(1L);
@@ -199,10 +227,11 @@ class TeacherEntityServiceImplTest {
     }
 
     @Test
-    void getScheduleByTeacher_whenTeacherNotExists_shouldThrowNotFoundException() {
-        when(teacherRepository.findByIdOrThrow(99L)).thenThrow(new NotFoundException("not found"));
+    void getScheduleByTeacher_whenTeacherNotExists_shouldReturnEmptyList() {
+        when(scheduleRepository.findByCourseEntityTeacherEntityId(99L)).thenReturn(List.of());
 
-        assertThatThrownBy(() -> teacherService.getScheduleByTeacher(99L))
-                .isInstanceOf(NotFoundException.class);
+        List<ScheduleResponse> result = teacherService.getScheduleByTeacher(99L);
+
+        assertThat(result).isEmpty();
     }
 }

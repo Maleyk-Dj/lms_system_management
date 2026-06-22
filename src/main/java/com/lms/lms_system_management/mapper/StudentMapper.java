@@ -12,6 +12,7 @@ public interface StudentMapper {
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "groupEntity", ignore = true)
+    @Mapping(target = "deleted", ignore = true)
     StudentEntity toEntity(NewStudentRequest newStudentRequest);
 
     @Mapping(target = "id", ignore = true)
@@ -24,5 +25,6 @@ public interface StudentMapper {
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     @Mapping(target = "groupEntity", ignore = true)
     @Mapping(target = "id", ignore = true)
+    @Mapping(target = "deleted", ignore = true)
     void updateStudent(UpdateStudentRequest request, @MappingTarget StudentEntity studentEntity);
 }

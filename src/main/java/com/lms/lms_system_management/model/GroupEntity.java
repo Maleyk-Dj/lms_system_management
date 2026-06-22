@@ -10,7 +10,6 @@ import org.hibernate.annotations.SQLRestriction;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@Builder
 @ToString
 @SQLRestriction("deleted=false")
 public class GroupEntity {

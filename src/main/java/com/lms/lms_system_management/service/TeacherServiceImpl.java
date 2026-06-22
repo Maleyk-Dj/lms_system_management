@@ -2,11 +2,13 @@ package com.lms.lms_system_management.service;
 
 import com.lms.lms_system_management.dao.ScheduleRepository;
 import com.lms.lms_system_management.dao.TeacherRepository;
+import com.lms.lms_system_management.dao.specification.TeacherSpecification;
 import com.lms.lms_system_management.dto.teacher.NewTeacherRequest;
 import com.lms.lms_system_management.dto.teacher.TeacherFilter;
 import com.lms.lms_system_management.dto.teacher.UpdateTeacherRequest;
 import com.lms.lms_system_management.dto.schedule.ScheduleResponse;
 import com.lms.lms_system_management.dto.teacher.TeacherResponse;
+import com.lms.lms_system_management.exception.NotFoundException;
 import com.lms.lms_system_management.mapper.ScheduleMapper;
 import com.lms.lms_system_management.mapper.TeacherMapper;
 import com.lms.lms_system_management.model.TeacherEntity;
@@ -14,13 +16,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-
-import static com.lms.lms_system_management.dao.specification.TeacherSpecification.*;
 
 @Service
 @RequiredArgsConstructor
@@ -34,14 +33,12 @@ public class TeacherServiceImpl implements TeacherService {
 
     @Override
     public TeacherResponse create(NewTeacherRequest teacher) {
-
         TeacherEntity saved = teacherRepository.save(teacherMapper.toEntity(teacher));
         return teacherMapper.toResponse(saved);
     }
 
     @Override
     public TeacherResponse getById(Long id) {
-
         TeacherEntity teacherEntity = teacherRepository.findByIdOrThrow(id);
         return teacherMapper.toResponse(teacherEntity);
     }
@@ -49,21 +46,13 @@ public class TeacherServiceImpl implements TeacherService {
     @Transactional(readOnly = true)
     @Override
     public Page<TeacherResponse> getAll(TeacherFilter filter, Pageable pageable) {
-
-        Specification<TeacherEntity> spec = Specification
-                .allOf(
-                        hasFirstName(filter.firstName()),
-                        hasLastName(filter.lastName())
-                );
-
-        return teacherRepository.findAll(spec, pageable)
+        return teacherRepository.findAll(TeacherSpecification.build(filter), pageable)
                 .map(teacherMapper::toResponse);
     }
 
     @Transactional
     @Override
     public TeacherResponse update(UpdateTeacherRequest teacher, Long id) {
-
         TeacherEntity updated = teacherRepository.findByIdOrThrow(id);
         teacherMapper.updateEntity(teacher, updated);
         TeacherEntity saved = teacherRepository.save(updated);
@@ -73,17 +62,16 @@ public class TeacherServiceImpl implements TeacherService {
     @Transactional
     @Override
     public void deleteById(Long id) {
+        int updated = teacherRepository.softDeletedById(id);
 
-        TeacherEntity deleted = teacherRepository.findByIdOrThrow(id);
-        deleted.setDeleted(true);
-        teacherRepository.save(deleted);
-
+        if (updated == 0) {
+            throw new NotFoundException("Преподаватель с id " + id + " не найден");
+        }
     }
 
     @Transactional(readOnly = true)
     @Override
     public List<ScheduleResponse> getScheduleByTeacher(Long id) {
-
         return scheduleRepository.findByCourseEntityTeacherEntityId(id)
                 .stream()
                 .map(scheduleMapper::toResponse)

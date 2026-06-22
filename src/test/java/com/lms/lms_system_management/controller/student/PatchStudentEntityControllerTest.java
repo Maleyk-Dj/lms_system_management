@@ -17,6 +17,7 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
@@ -30,6 +31,8 @@ class PatchStudentEntityControllerTest {
     private StudentRepository studentRepository;
     @Autowired
     private GroupRepository groupRepository;
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
 
     private Long studentId;
     private Long groupId;
@@ -37,31 +40,28 @@ class PatchStudentEntityControllerTest {
 
     @BeforeEach
     public void setUp() {
-        GroupEntity groupEntity = GroupEntity.builder().
-                name("Gruppa A")
-                .build();
+        GroupEntity groupEntity = new GroupEntity();
+        groupEntity.setName("Gruppa A");
         groupRepository.save(groupEntity);
         groupId = groupEntity.getId();
 
-        GroupEntity anotherGroupEntity = GroupEntity.builder().
-                name("Gruppa B")
-                .build();
+        GroupEntity anotherGroupEntity = new GroupEntity();
+        anotherGroupEntity.setName("Gruppa B");
         groupRepository.save(anotherGroupEntity);
         anotherGroupId = anotherGroupEntity.getId();
 
-        StudentEntity studentEntity = StudentEntity.builder()
-                .firstName("Valya")
-                .lastName("Ivanova")
-                .groupEntity(groupEntity)
-                .build();
+        StudentEntity studentEntity = new StudentEntity();
+        studentEntity.setFirstName("Valya");
+        studentEntity.setLastName("Ivanova");
+        studentEntity.setGroupEntity(groupEntity);
         studentRepository.save(studentEntity);
         studentId = studentEntity.getId();
     }
 
     @AfterEach
     public void tearDown() {
-        studentRepository.deleteAll();
-        groupRepository.deleteAll();
+        jdbcTemplate.execute("DELETE FROM students");
+        jdbcTemplate.execute("DELETE FROM groups");
     }
 
     @Test
@@ -91,15 +91,14 @@ class PatchStudentEntityControllerTest {
     }
 
     @Test
-    void getAllStudents_shouldReturn200AndNonEmptyList() {
-        ResponseEntity<StudentResponse[]> response = restTemplate.getForEntity(
-                "/api/students"
-                , StudentResponse[].class
+    void getAllStudents_shouldReturn200AndNonEmptyContent() {
+        ResponseEntity<String> response = restTemplate.getForEntity(
+                "/api/students",
+                String.class
         );
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-        StudentResponse[] body = response.getBody();
-        assertThat(body).isNotNull();
-        assertThat(body.length).isGreaterThan(0);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody()).contains("Valya");
     }
 
     @Test

@@ -2,6 +2,7 @@ package com.lms.lms_system_management.controller.course;
 
 import com.lms.lms_system_management.TestcontainersConfiguration;
 import com.lms.lms_system_management.dao.CourseRepository;
+import com.lms.lms_system_management.dao.ScheduleRepository;
 import com.lms.lms_system_management.dao.TeacherRepository;
 import com.lms.lms_system_management.dto.course.NewCourseRequest;
 import com.lms.lms_system_management.dto.course.CourseResponse;
@@ -33,23 +34,25 @@ class PostCourseControllerTest {
     private CourseRepository courseRepository;
     @Autowired
     private TeacherRepository teacherRepository;
+    @Autowired
+    private ScheduleRepository scheduleRepository;
 
     private Long teacherId;
 
     @BeforeEach
     public void setup() {
-        TeacherEntity teacherEntity = TeacherEntity.builder()
-                .firstName("Li")
-                .lastName("Dja").
-                build();
+        TeacherEntity teacherEntity = new TeacherEntity();
+        teacherEntity.setFirstName("Li");
+        teacherEntity.setLastName("Dja");
         teacherRepository.save(teacherEntity);
         teacherId = teacherEntity.getId();
     }
 
     @AfterEach
     public void tearDown() {
-        courseRepository.deleteAll();
-        teacherRepository.deleteAll();
+        scheduleRepository.deleteAllInBatch();
+        courseRepository.deleteAllInBatch();
+        teacherRepository.deleteAllInBatch();
     }
 
     @Test

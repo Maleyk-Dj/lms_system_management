@@ -15,6 +15,7 @@ public interface TeacherMapper {
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "courses", ignore = true)
+    @Mapping(target = "deleted", ignore = true)
     TeacherEntity toEntity(NewTeacherRequest teacher);
 
     TeacherResponse toResponse(TeacherEntity teacherEntity);
@@ -22,5 +23,6 @@ public interface TeacherMapper {
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "courses", ignore = true)
+    @Mapping(target = "deleted", ignore = true)
     void updateEntity(UpdateTeacherRequest request, @MappingTarget TeacherEntity teacherEntity);
 }

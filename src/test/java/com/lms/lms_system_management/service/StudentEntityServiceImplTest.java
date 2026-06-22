@@ -3,6 +3,7 @@ package com.lms.lms_system_management.service;
 import com.lms.lms_system_management.dao.GroupRepository;
 import com.lms.lms_system_management.dao.StudentRepository;
 import com.lms.lms_system_management.dto.student.NewStudentRequest;
+import com.lms.lms_system_management.dto.student.StudentFilter;
 import com.lms.lms_system_management.dto.student.UpdateStudentRequest;
 import com.lms.lms_system_management.dto.student.StudentResponse;
 import com.lms.lms_system_management.exception.AlreadyExistsException;
@@ -15,6 +16,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 
 import java.util.List;
 
@@ -41,10 +47,23 @@ class StudentEntityServiceImplTest {
 
     @Test
     void create_whenGroupExists_shouldSaveAndReturnResponse() {
-        GroupEntity groupEntity = GroupEntity.builder().id(1L).name("Gruppa A").build();
+        GroupEntity groupEntity = new GroupEntity();
+        groupEntity.setId(1L);
+        groupEntity.setName("Gruppa A");
+
         NewStudentRequest request = new NewStudentRequest("Ivan", "Petrov", 1L);
-        StudentEntity entity = StudentEntity.builder().firstName("Ivan").lastName("Petrov").groupEntity(groupEntity).build();
-        StudentEntity saved = StudentEntity.builder().id(10L).firstName("Ivan").lastName("Petrov").groupEntity(groupEntity).build();
+
+        StudentEntity entity = new StudentEntity();
+        entity.setFirstName("Ivan");
+        entity.setLastName("Petrov");
+        entity.setGroupEntity(groupEntity);
+
+        StudentEntity saved = new StudentEntity();
+        saved.setId(10L);
+        saved.setFirstName("Ivan");
+        saved.setLastName("Petrov");
+        saved.setGroupEntity(groupEntity);
+
         StudentResponse expected = new StudentResponse(10L, "Ivan", "Petrov", 1L);
 
         when(groupRepository.findByIdOrThrow(1L)).thenReturn(groupEntity);
@@ -72,8 +91,15 @@ class StudentEntityServiceImplTest {
 
     @Test
     void getById_whenExists_shouldReturnResponse() {
-        GroupEntity groupEntity = GroupEntity.builder().id(1L).build();
-        StudentEntity studentEntity = StudentEntity.builder().id(5L).firstName("Ivan").lastName("Petrov").groupEntity(groupEntity).build();
+        GroupEntity groupEntity = new GroupEntity();
+        groupEntity.setId(1L);
+
+        StudentEntity studentEntity = new StudentEntity();
+        studentEntity.setId(5L);
+        studentEntity.setFirstName("Ivan");
+        studentEntity.setLastName("Petrov");
+        studentEntity.setGroupEntity(groupEntity);
+
         StudentResponse expected = new StudentResponse(5L, "Ivan", "Petrov", 1L);
 
         when(studentRepository.findByIdOrThrow(5L)).thenReturn(studentEntity);
@@ -96,36 +122,69 @@ class StudentEntityServiceImplTest {
 
     @Test
     void getAll_shouldReturnListOfResponses() {
-        GroupEntity groupEntity = GroupEntity.builder().id(1L).build();
-        StudentEntity s1 = StudentEntity.builder().id(1L).firstName("Ivan").lastName("Petrov").groupEntity(groupEntity).build();
-        StudentEntity s2 = StudentEntity.builder().id(2L).firstName("Anna").lastName("Ivanova").groupEntity(groupEntity).build();
+        StudentFilter filter = new StudentFilter(null, null, null);
+        Pageable pageable = PageRequest.of(0, 10);
+
+        GroupEntity groupEntity = new GroupEntity();
+        groupEntity.setId(1L);
+
+        StudentEntity s1 = new StudentEntity();
+        s1.setId(1L);
+        s1.setFirstName("Ivan");
+        s1.setLastName("Petrov");
+        s1.setGroupEntity(groupEntity);
+
+        StudentEntity s2 = new StudentEntity();
+        s2.setId(2L);
+        s2.setFirstName("Anna");
+        s2.setLastName("Ivanova");
+        s2.setGroupEntity(groupEntity);
+
         StudentResponse r1 = new StudentResponse(1L, "Ivan", "Petrov", 1L);
         StudentResponse r2 = new StudentResponse(2L, "Anna", "Ivanova", 1L);
 
-        when(studentRepository.findAll()).thenReturn(List.of(s1, s2));
+        when(studentRepository.findAll(any(Specification.class), eq(pageable)))
+                .thenReturn(new PageImpl<>(List.of(s1, s2)));
         when(studentMapper.toResponse(s1)).thenReturn(r1);
         when(studentMapper.toResponse(s2)).thenReturn(r2);
 
-        List<StudentResponse> result = studentServiceImpl.getAll();
+        Page<StudentResponse> result = studentServiceImpl.getAll(filter, pageable);
 
-        assertThat(result).hasSize(2).containsExactly(r1, r2);
+        assertThat(result.getContent()).hasSize(2).containsExactly(r1, r2);
     }
 
     @Test
     void getAll_whenEmpty_shouldReturnEmptyList() {
-        when(studentRepository.findAll()).thenReturn(List.of());
+        StudentFilter filter = new StudentFilter(null, null, null);
+        Pageable pageable = PageRequest.of(0, 10);
 
-        assertThat(studentServiceImpl.getAll()).isEmpty();
+        when(studentRepository.findAll(any(Specification.class), eq(pageable)))
+                .thenReturn(new PageImpl<>(List.of()));
+
+        assertThat(studentServiceImpl.getAll(filter, pageable).getContent()).isEmpty();
     }
 
     // UPDATE
 
     @Test
     void update_withoutGroupChange_shouldUpdateAndReturnResponse() {
-        GroupEntity groupEntity = GroupEntity.builder().id(1L).build();
-        StudentEntity studentEntity = StudentEntity.builder().id(5L).firstName("Ivan").lastName("Petrov").groupEntity(groupEntity).build();
+        GroupEntity groupEntity = new GroupEntity();
+        groupEntity.setId(1L);
+
+        StudentEntity studentEntity = new StudentEntity();
+        studentEntity.setId(5L);
+        studentEntity.setFirstName("Ivan");
+        studentEntity.setLastName("Petrov");
+        studentEntity.setGroupEntity(groupEntity);
+
         UpdateStudentRequest request = new UpdateStudentRequest("Oleg", "Olegov", null);
-        StudentEntity saved = StudentEntity.builder().id(5L).firstName("Oleg").lastName("Olegov").groupEntity(groupEntity).build();
+
+        StudentEntity saved = new StudentEntity();
+        saved.setId(5L);
+        saved.setFirstName("Oleg");
+        saved.setLastName("Olegov");
+        saved.setGroupEntity(groupEntity);
+
         StudentResponse expected = new StudentResponse(5L, "Oleg", "Olegov", 1L);
 
         when(studentRepository.findByIdOrThrow(5L)).thenReturn(studentEntity);
@@ -141,11 +200,26 @@ class StudentEntityServiceImplTest {
 
     @Test
     void update_withGroupChange_shouldUpdateGroupAndReturnResponse() {
-        GroupEntity oldGroupEntity = GroupEntity.builder().id(1L).build();
-        GroupEntity newGroupEntity = GroupEntity.builder().id(2L).build();
-        StudentEntity studentEntity = StudentEntity.builder().id(5L).firstName("Ivan").lastName("Petrov").groupEntity(oldGroupEntity).build();
+        GroupEntity oldGroupEntity = new GroupEntity();
+        oldGroupEntity.setId(1L);
+
+        GroupEntity newGroupEntity = new GroupEntity();
+        newGroupEntity.setId(2L);
+
+        StudentEntity studentEntity = new StudentEntity();
+        studentEntity.setId(5L);
+        studentEntity.setFirstName("Ivan");
+        studentEntity.setLastName("Petrov");
+        studentEntity.setGroupEntity(oldGroupEntity);
+
         UpdateStudentRequest request = new UpdateStudentRequest(null, null, 2L);
-        StudentEntity saved = StudentEntity.builder().id(5L).firstName("Ivan").lastName("Petrov").groupEntity(newGroupEntity).build();
+
+        StudentEntity saved = new StudentEntity();
+        saved.setId(5L);
+        saved.setFirstName("Ivan");
+        saved.setLastName("Petrov");
+        saved.setGroupEntity(newGroupEntity);
+
         StudentResponse expected = new StudentResponse(5L, "Ivan", "Petrov", 2L);
 
         when(studentRepository.findByIdOrThrow(5L)).thenReturn(studentEntity);
@@ -170,8 +244,13 @@ class StudentEntityServiceImplTest {
 
     @Test
     void update_whenNewGroupNotExists_shouldThrowNotFoundException() {
-        GroupEntity groupEntity = GroupEntity.builder().id(1L).build();
-        StudentEntity studentEntity = StudentEntity.builder().id(5L).groupEntity(groupEntity).build();
+        GroupEntity groupEntity = new GroupEntity();
+        groupEntity.setId(1L);
+
+        StudentEntity studentEntity = new StudentEntity();
+        studentEntity.setId(5L);
+        studentEntity.setGroupEntity(groupEntity);
+
         UpdateStudentRequest request = new UpdateStudentRequest(null, null, 99L);
 
         when(studentRepository.findByIdOrThrow(5L)).thenReturn(studentEntity);
@@ -186,31 +265,44 @@ class StudentEntityServiceImplTest {
 
     @Test
     void deleteById_whenExists_shouldDelete() {
-        StudentEntity studentEntity = StudentEntity.builder().id(5L).build();
-        when(studentRepository.findByIdOrThrow(5L)).thenReturn(studentEntity);
+        when(studentRepository.softDeleteById(5L)).thenReturn(1);
 
         studentServiceImpl.deleteById(5L);
 
-        verify(studentRepository).delete(studentEntity);
+        verify(studentRepository).softDeleteById(5L);
     }
 
     @Test
     void deleteById_whenNotExists_shouldThrowNotFoundException() {
-        when(studentRepository.findByIdOrThrow(99L)).thenThrow(new NotFoundException("not found"));
+        when(studentRepository.softDeleteById(99L)).thenReturn(0);
 
         assertThatThrownBy(() -> studentServiceImpl.deleteById(99L))
                 .isInstanceOf(NotFoundException.class);
-        verify(studentRepository, never()).delete(any());
+        verify(studentRepository, never()).delete(any(StudentEntity.class));
     }
 
     // ADD TO GROUP
 
     @Test
     void addToGroup_whenValid_shouldUpdateGroupAndReturnResponse() {
-        GroupEntity oldGroupEntity = GroupEntity.builder().id(1L).build();
-        GroupEntity newGroupEntity = GroupEntity.builder().id(2L).build();
-        StudentEntity studentEntity = StudentEntity.builder().id(5L).firstName("Ivan").lastName("Petrov").groupEntity(oldGroupEntity).build();
-        StudentEntity saved = StudentEntity.builder().id(5L).firstName("Ivan").lastName("Petrov").groupEntity(newGroupEntity).build();
+        GroupEntity oldGroupEntity = new GroupEntity();
+        oldGroupEntity.setId(1L);
+
+        GroupEntity newGroupEntity = new GroupEntity();
+        newGroupEntity.setId(2L);
+
+        StudentEntity studentEntity = new StudentEntity();
+        studentEntity.setId(5L);
+        studentEntity.setFirstName("Ivan");
+        studentEntity.setLastName("Petrov");
+        studentEntity.setGroupEntity(oldGroupEntity);
+
+        StudentEntity saved = new StudentEntity();
+        saved.setId(5L);
+        saved.setFirstName("Ivan");
+        saved.setLastName("Petrov");
+        saved.setGroupEntity(newGroupEntity);
+
         StudentResponse expected = new StudentResponse(5L, "Ivan", "Petrov", 2L);
 
         when(studentRepository.findByIdOrThrow(5L)).thenReturn(studentEntity);
@@ -225,8 +317,12 @@ class StudentEntityServiceImplTest {
 
     @Test
     void addToGroup_whenAlreadyInGroup_shouldThrowAlreadyExistsException() {
-        GroupEntity groupEntity = GroupEntity.builder().id(1L).build();
-        StudentEntity studentEntity = StudentEntity.builder().id(5L).groupEntity(groupEntity).build();
+        GroupEntity groupEntity = new GroupEntity();
+        groupEntity.setId(1L);
+
+        StudentEntity studentEntity = new StudentEntity();
+        studentEntity.setId(5L);
+        studentEntity.setGroupEntity(groupEntity);
 
         when(studentRepository.findByIdOrThrow(5L)).thenReturn(studentEntity);
         when(groupRepository.findByIdOrThrow(1L)).thenReturn(groupEntity);
@@ -246,7 +342,13 @@ class StudentEntityServiceImplTest {
 
     @Test
     void addToGroup_whenGroupNotExists_shouldThrowNotFoundException() {
-        StudentEntity studentEntity = StudentEntity.builder().id(5L).groupEntity(GroupEntity.builder().id(1L).build()).build();
+        GroupEntity groupEntity = new GroupEntity();
+        groupEntity.setId(1L);
+
+        StudentEntity studentEntity = new StudentEntity();
+        studentEntity.setId(5L);
+        studentEntity.setGroupEntity(groupEntity);
+
         when(studentRepository.findByIdOrThrow(5L)).thenReturn(studentEntity);
         when(groupRepository.findByIdOrThrow(99L)).thenThrow(new NotFoundException("not found"));
 

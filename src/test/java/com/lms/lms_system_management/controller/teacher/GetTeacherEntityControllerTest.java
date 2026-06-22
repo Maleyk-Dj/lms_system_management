@@ -1,6 +1,8 @@
 package com.lms.lms_system_management.controller.teacher;
 
 import com.lms.lms_system_management.TestcontainersConfiguration;
+import com.lms.lms_system_management.dao.CourseRepository;
+import com.lms.lms_system_management.dao.ScheduleRepository;
 import com.lms.lms_system_management.dao.TeacherRepository;
 import com.lms.lms_system_management.dto.teacher.TeacherResponse;
 import com.lms.lms_system_management.model.TeacherEntity;
@@ -26,21 +28,28 @@ class GetTeacherEntityControllerTest {
     @Autowired
     private TeacherRepository teacherRepository;
 
+    @Autowired
+    private CourseRepository courseRepository;
+
+    @Autowired
+    private ScheduleRepository scheduleRepository;
+
     private Long teacherId;
 
     @BeforeEach
     public void setup() {
-        TeacherEntity teacherEntity = TeacherEntity.builder()
-                .firstName("Malika")
-                .lastName("Djabrailova")
-                .build();
+        TeacherEntity teacherEntity = new TeacherEntity();
+        teacherEntity.setFirstName("Malika");
+        teacherEntity.setLastName("Djabrailova");
         teacherRepository.save(teacherEntity);
         teacherId = teacherEntity.getId();
     }
 
     @AfterEach
     public void tearDown() {
-        teacherRepository.deleteAll();
+        scheduleRepository.deleteAllInBatch();
+        courseRepository.deleteAllInBatch();
+        teacherRepository.deleteAllInBatch();
     }
 
     @Test
@@ -72,18 +81,15 @@ class GetTeacherEntityControllerTest {
     }
 
     @Test
-    void getAllTeachers_shouldReturn200AndNonEmptyList() {
-        ResponseEntity<TeacherResponse[]> response = testRestTemplate.getForEntity(
+    void getAllTeachers_shouldReturn200AndNonEmptyContent() {
+        ResponseEntity<String> response = testRestTemplate.getForEntity(
                 "/api/teachers",
-                TeacherResponse[].class
+                String.class
         );
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-
-        TeacherResponse[] body = response.getBody();
-
-        assertThat(body).isNotNull();
-        assertThat(body.length).isGreaterThan(0);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody()).contains("Malika");
     }
     @Test
     void getScheduleByTeacher_shouldReturn200AndEmptyList() {
@@ -102,13 +108,15 @@ class GetTeacherEntityControllerTest {
     }
 
     @Test
-    void getScheduleByTeacher_whenNotExists_shouldReturn404() {
-        ResponseEntity<Void>response = testRestTemplate.getForEntity(
+    void getScheduleByTeacher_whenNotExists_shouldReturn200AndEmptyList() {
+        ResponseEntity<Object[]> response = testRestTemplate.getForEntity(
                 "/api/teachers/{id}/schedules",
-                Void.class,
+                Object[].class,
                 99999L
         );
 
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().length).isEqualTo(0);
     }
 }

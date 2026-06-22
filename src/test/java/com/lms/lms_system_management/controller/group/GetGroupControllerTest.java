@@ -2,6 +2,7 @@ package com.lms.lms_system_management.controller.group;
 
 import com.lms.lms_system_management.TestcontainersConfiguration;
 import com.lms.lms_system_management.dao.GroupRepository;
+import com.lms.lms_system_management.dao.StudentRepository;
 import com.lms.lms_system_management.dto.group.GroupResponse;
 import com.lms.lms_system_management.model.GroupEntity;
 import org.junit.jupiter.api.AfterEach;
@@ -26,20 +27,23 @@ class GetGroupControllerTest {
     @Autowired
     private GroupRepository groupRepository;
 
+    @Autowired
+    private StudentRepository studentRepository;
+
     private Long groupId;
 
     @BeforeEach
     public void setUp() {
-        GroupEntity groupEntity = GroupEntity.builder()
-                .name("Gruppa A")
-                .build();
+        GroupEntity groupEntity = new GroupEntity();
+        groupEntity.setName("Gruppa A");
         groupRepository.save(groupEntity);
         groupId = groupEntity.getId();
     }
 
     @AfterEach
     public void tearDown() {
-        groupRepository.deleteAll();
+        studentRepository.deleteAllInBatch();
+        groupRepository.deleteAllInBatch();
     }
 
     @Test
@@ -71,17 +75,14 @@ class GetGroupControllerTest {
     }
 
     @Test
-    void getAllGroups_shouldReturn200AndNonEmptyList() {
-        ResponseEntity<GroupResponse[]> response = restTemplate.getForEntity(
+    void getAllGroups_shouldReturn200AndNonEmptyContent() {
+        ResponseEntity<String> response = restTemplate.getForEntity(
                 "/api/groups",
-                GroupResponse[].class
+                String.class
         );
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-
-        GroupResponse[] body = response.getBody();
-
-        assertThat(body).isNotNull();
-        assertThat(body.length).isGreaterThan(0);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody()).contains("Gruppa A");
     }
 }

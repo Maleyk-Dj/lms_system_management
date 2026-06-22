@@ -2,6 +2,7 @@ package com.lms.lms_system_management.controller.course;
 
 import com.lms.lms_system_management.TestcontainersConfiguration;
 import com.lms.lms_system_management.dao.CourseRepository;
+import com.lms.lms_system_management.dao.ScheduleRepository;
 import com.lms.lms_system_management.dao.TeacherRepository;
 import com.lms.lms_system_management.dto.course.UpdateCourseRequest;
 import com.lms.lms_system_management.dto.course.CourseResponse;
@@ -37,6 +38,8 @@ public class PutCourseControllerTest {
     private CourseRepository courseRepository;
     @Autowired
     private TeacherRepository teacherRepository;
+    @Autowired
+    private ScheduleRepository scheduleRepository;
 
     private Long courseId;
     private Long anotherTeacherId;
@@ -44,32 +47,30 @@ public class PutCourseControllerTest {
     @BeforeEach
     public void setup() {
 
-        TeacherEntity teacherEntity = TeacherEntity.builder()
-                .firstName("Li")
-                .lastName("Dja")
-                .build();
+        TeacherEntity teacherEntity = new TeacherEntity();
+        teacherEntity.setFirstName("Li");
+        teacherEntity.setLastName("Dja");
         teacherRepository.save(teacherEntity);
 
-        TeacherEntity anotherTeacherEntity = TeacherEntity.builder()
-                .firstName("Ira")
-                .lastName("Varnava")
-                .build();
+        TeacherEntity anotherTeacherEntity = new TeacherEntity();
+        anotherTeacherEntity.setFirstName("Ira");
+        anotherTeacherEntity.setLastName("Varnava");
         teacherRepository.save(anotherTeacherEntity);
         anotherTeacherId = anotherTeacherEntity.getId();
 
-        CourseEntity courseEntity = CourseEntity.builder()
-                .name("Java")
-                .description("Kurs po Java")
-                .teacherEntity(teacherEntity)
-                .build();
+        CourseEntity courseEntity = new CourseEntity();
+        courseEntity.setName("Java");
+        courseEntity.setDescription("Kurs po razrabotke Java");
+        courseEntity.setTeacherEntity(teacherEntity);
         courseRepository.save(courseEntity);
         courseId = courseEntity.getId();
     }
 
     @AfterEach
     public void tearDown() {
-        courseRepository.deleteAll();
-        teacherRepository.deleteAll();
+        scheduleRepository.deleteAllInBatch();
+        courseRepository.deleteAllInBatch();
+        teacherRepository.deleteAllInBatch();
     }
     @Test
     void updateCourse_shouldReturn200AndUpdatedBody() {

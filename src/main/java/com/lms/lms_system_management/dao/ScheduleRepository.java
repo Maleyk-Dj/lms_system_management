@@ -4,6 +4,9 @@ import com.lms.lms_system_management.exception.NotFoundException;
 import com.lms.lms_system_management.model.ScheduleEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -18,4 +21,8 @@ public interface ScheduleRepository extends JpaRepository<ScheduleEntity, Long>,
     }
 
     List<ScheduleEntity> findByCourseEntityTeacherEntityId(Long teacherId);
+
+    @Modifying
+    @Query("UPDATE ScheduleEntity sc SET sc.deleted = true WHERE sc.id= :id")
+    int softDeleteById(@Param("id") Long id);
 }

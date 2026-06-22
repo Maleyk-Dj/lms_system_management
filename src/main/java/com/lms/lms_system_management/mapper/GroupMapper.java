@@ -14,11 +14,13 @@ import org.mapstruct.NullValuePropertyMappingStrategy;
 public interface GroupMapper {
 
     @Mapping(target = "id", ignore = true)
+    @Mapping(target = "deleted", ignore = true)
     GroupEntity toEntity(NewGroupRequest newGroupRequest);
 
     GroupResponse toResponse(GroupEntity groupEntity);
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     @Mapping(target = "id", ignore = true)
+    @Mapping(target = "deleted", ignore = true)
     void updateGroup(UpdateGroupRequest updateGroupRequest, @MappingTarget GroupEntity groupEntity);
 }

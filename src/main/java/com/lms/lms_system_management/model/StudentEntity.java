@@ -11,7 +11,6 @@ import org.hibernate.annotations.SQLRestriction;
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString
-@Builder
 @SQLRestriction("deleted=false")
 public class StudentEntity {
 

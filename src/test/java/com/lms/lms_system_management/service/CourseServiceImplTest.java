@@ -2,6 +2,7 @@ package com.lms.lms_system_management.service;
 
 import com.lms.lms_system_management.dao.CourseRepository;
 import com.lms.lms_system_management.dao.TeacherRepository;
+import com.lms.lms_system_management.dto.course.CourseFilter;
 import com.lms.lms_system_management.dto.course.NewCourseRequest;
 import com.lms.lms_system_management.dto.course.UpdateCourseRequest;
 import com.lms.lms_system_management.dto.course.CourseResponse;
@@ -15,6 +16,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 
 import java.util.List;
 
@@ -41,10 +47,24 @@ public class CourseServiceImplTest {
 
     @Test
     void create_whenTeacherExists_shouldSaveAndReturnResponse() {
-        TeacherEntity teacherEntity = TeacherEntity.builder().id(1L).firstName("Ivan").lastName("Petrov").build();
+        TeacherEntity teacherEntity = new TeacherEntity();
+        teacherEntity.setId(1L);
+        teacherEntity.setFirstName("Ivan");
+        teacherEntity.setLastName("Petrov");
+
         NewCourseRequest request = new NewCourseRequest("Java", "Kurs po Java", 1L);
-        CourseEntity entity = CourseEntity.builder().name("Java").description("Kurs po Java").teacherEntity(teacherEntity).build();
-        CourseEntity saved = CourseEntity.builder().id(10L).name("Java").description("Kurs po Java").teacherEntity(teacherEntity).build();
+
+        CourseEntity entity = new CourseEntity();
+        entity.setName("Java");
+        entity.setDescription("Kurs po Java");
+        entity.setTeacherEntity(teacherEntity);
+
+        CourseEntity saved = new CourseEntity();
+        saved.setId(10L);
+        saved.setName("Java");
+        saved.setDescription("Kurs po Java");
+        saved.setTeacherEntity(teacherEntity);
+
         CourseResponse expected = new CourseResponse(10L, "Java", "Kurs po Java",
                 new TeacherResponse(1L, "Ivan", "Petrov"));
 
@@ -73,8 +93,15 @@ public class CourseServiceImplTest {
 
     @Test
     void getById_whenExists_shouldReturnResponse() {
-        TeacherEntity teacherEntity = TeacherEntity.builder().id(1L).build();
-        CourseEntity courseEntity = CourseEntity.builder().id(5L).name("Java").description("Desc").teacherEntity(teacherEntity).build();
+        TeacherEntity teacherEntity = new TeacherEntity();
+        teacherEntity.setId(1L);
+
+        CourseEntity courseEntity = new CourseEntity();
+        courseEntity.setId(5L);
+        courseEntity.setName("Java");
+        courseEntity.setDescription("Desc");
+        courseEntity.setTeacherEntity(teacherEntity);
+
         CourseResponse expected = new CourseResponse(5L, "Java", "Desc",
                 new TeacherResponse(1L, null, null));
 
@@ -97,38 +124,75 @@ public class CourseServiceImplTest {
     // FIND ALL
 
     @Test
-    void findAll_shouldReturnListOfResponses() {
-        TeacherEntity teacherEntity = TeacherEntity.builder().id(1L).build();
-        CourseEntity c1 = CourseEntity.builder().id(1L).name("Java").description("D1").teacherEntity(teacherEntity).build();
-        CourseEntity c2 = CourseEntity.builder().id(2L).name("Spring").description("D2").teacherEntity(teacherEntity).build();
+    void findAll_shouldReturnPagedResponses() {
+        CourseFilter filter = new CourseFilter(null, null);
+        Pageable pageable = PageRequest.of(0, 10);
+
+        TeacherEntity teacherEntity = new TeacherEntity();
+        teacherEntity.setId(1L);
+
+        CourseEntity c1 = new CourseEntity();
+        c1.setId(1L);
+        c1.setName("Java");
+        c1.setDescription("D1");
+        c1.setTeacherEntity(teacherEntity);
+
+        CourseEntity c2 = new CourseEntity();
+        c2.setId(2L);
+        c2.setName("Spring");
+        c2.setDescription("D2");
+        c2.setTeacherEntity(teacherEntity);
+
         CourseResponse r1 = new CourseResponse(1L, "Java", "D1", null);
         CourseResponse r2 = new CourseResponse(2L, "Spring", "D2", null);
 
-        when(courseRepository.findAll()).thenReturn(List.of(c1, c2));
+        when(courseRepository.findAll(any(Specification.class), eq(pageable)))
+                .thenReturn(new PageImpl<>(List.of(c1, c2)));
         when(courseMapper.toResponse(c1)).thenReturn(r1);
         when(courseMapper.toResponse(c2)).thenReturn(r2);
 
-        List<CourseResponse> result = courseService.findAll();
+        Page<CourseResponse> result = courseService.findAll(filter, pageable);
 
-        assertThat(result).hasSize(2).containsExactly(r1, r2);
+        assertThat(result.getContent()).hasSize(2).containsExactly(r1, r2);
     }
 
     @Test
-    void findAll_whenEmpty_shouldReturnEmptyList() {
-        when(courseRepository.findAll()).thenReturn(List.of());
+    void findAll_whenEmpty_shouldReturnEmptyPage() {
+        CourseFilter filter = new CourseFilter(null, null);
+        Pageable pageable = PageRequest.of(0, 10);
 
-        assertThat(courseService.findAll()).isEmpty();
+        when(courseRepository.findAll(any(Specification.class), eq(pageable)))
+                .thenReturn(new PageImpl<>(List.of()));
+
+        assertThat(courseService.findAll(filter, pageable).getContent()).isEmpty();
     }
 
     // UPDATE
 
     @Test
     void update_whenCourseAndTeacherExist_shouldUpdateAndReturnResponse() {
-        TeacherEntity oldTeacherEntity = TeacherEntity.builder().id(1L).build();
-        TeacherEntity newTeacherEntity = TeacherEntity.builder().id(2L).firstName("Anna").lastName("Ivanova").build();
-        CourseEntity courseEntity = CourseEntity.builder().id(5L).name("Java").description("Desc").teacherEntity(oldTeacherEntity).build();
+        TeacherEntity oldTeacherEntity = new TeacherEntity();
+        oldTeacherEntity.setId(1L);
+
+        TeacherEntity newTeacherEntity = new TeacherEntity();
+        newTeacherEntity.setId(2L);
+        newTeacherEntity.setFirstName("Anna");
+        newTeacherEntity.setLastName("Ivanova");
+
+        CourseEntity courseEntity = new CourseEntity();
+        courseEntity.setId(5L);
+        courseEntity.setName("Java");
+        courseEntity.setDescription("Desc");
+        courseEntity.setTeacherEntity(oldTeacherEntity);
+
         UpdateCourseRequest request = new UpdateCourseRequest("Kotlin", "Kurs po Kotlin", 2L);
-        CourseEntity saved = CourseEntity.builder().id(5L).name("Kotlin").description("Kurs po Kotlin").teacherEntity(newTeacherEntity).build();
+
+        CourseEntity saved = new CourseEntity();
+        saved.setId(5L);
+        saved.setName("Kotlin");
+        saved.setDescription("Kurs po Kotlin");
+        saved.setTeacherEntity(newTeacherEntity);
+
         CourseResponse expected = new CourseResponse(5L, "Kotlin", "Kurs po Kotlin",
                 new TeacherResponse(2L, "Anna", "Ivanova"));
 
@@ -155,8 +219,15 @@ public class CourseServiceImplTest {
 
     @Test
     void update_whenTeacherNotExists_shouldThrowNotFoundException() {
-        TeacherEntity teacherEntity = TeacherEntity.builder().id(1L).build();
-        CourseEntity courseEntity = CourseEntity.builder().id(5L).name("Java").description("Desc").teacherEntity(teacherEntity).build();
+        TeacherEntity teacherEntity = new TeacherEntity();
+        teacherEntity.setId(1L);
+
+        CourseEntity courseEntity = new CourseEntity();
+        courseEntity.setId(5L);
+        courseEntity.setName("Java");
+        courseEntity.setDescription("Desc");
+        courseEntity.setTeacherEntity(teacherEntity);
+
         UpdateCourseRequest request = new UpdateCourseRequest("Kotlin", "Desc", 99L);
 
         when(courseRepository.findByIdOrThrow(5L)).thenReturn(courseEntity);
@@ -171,21 +242,19 @@ public class CourseServiceImplTest {
 
     @Test
     void delete_whenExists_shouldDeleteById() {
-        TeacherEntity teacherEntity = TeacherEntity.builder().id(1L).build();
-        CourseEntity courseEntity = CourseEntity.builder().id(5L).teacherEntity(teacherEntity).build();
-        when(courseRepository.findByIdOrThrow(5L)).thenReturn(courseEntity);
+        when(courseRepository.softDeleteById(5L)).thenReturn(1);
 
         courseService.deleteById(5L);
 
-        verify(courseRepository).delete(courseEntity);
+        verify(courseRepository).softDeleteById(5L);
     }
 
     @Test
     void delete_ById_whenNotExists_shouldThrowNotFoundException() {
-        when(courseRepository.findByIdOrThrow(99L)).thenThrow(new NotFoundException("not found"));
+        when(courseRepository.softDeleteById(99L)).thenReturn(0);
 
         assertThatThrownBy(() -> courseService.deleteById(99L))
                 .isInstanceOf(NotFoundException.class);
-        verify(courseRepository, never()).delete(any());
+        verify(courseRepository, never()).delete(any(CourseEntity.class));
     }
 }

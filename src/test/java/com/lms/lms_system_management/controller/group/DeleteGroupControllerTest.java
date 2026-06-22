@@ -2,6 +2,7 @@ package com.lms.lms_system_management.controller.group;
 
 import com.lms.lms_system_management.TestcontainersConfiguration;
 import com.lms.lms_system_management.dao.GroupRepository;
+import com.lms.lms_system_management.dao.StudentRepository;
 import com.lms.lms_system_management.model.GroupEntity;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -14,6 +15,7 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
@@ -27,20 +29,25 @@ class DeleteGroupControllerTest {
     @Autowired
     private GroupRepository groupRepository;
 
+    @Autowired
+    private StudentRepository studentRepository;
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
+
     private Long groupId;
 
     @BeforeEach
     public void setUp() {
-        GroupEntity groupEntity = GroupEntity.builder()
-                .name("Gruppa A")
-                .build();
+        GroupEntity groupEntity = new GroupEntity();
+        groupEntity.setName("Gruppa A");
         groupRepository.save(groupEntity);
         groupId = groupEntity.getId();
     }
 
     @AfterEach
     public void tearDown() {
-        groupRepository.deleteAll();
+        jdbcTemplate.execute("DELETE FROM students");
+        jdbcTemplate.execute("DELETE FROM groups");
     }
 
     @Test

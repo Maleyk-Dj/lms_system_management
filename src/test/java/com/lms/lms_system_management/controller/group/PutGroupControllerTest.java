@@ -2,6 +2,7 @@ package com.lms.lms_system_management.controller.group;
 
 import com.lms.lms_system_management.TestcontainersConfiguration;
 import com.lms.lms_system_management.dao.GroupRepository;
+import com.lms.lms_system_management.dao.StudentRepository;
 import com.lms.lms_system_management.dto.group.UpdateGroupRequest;
 import com.lms.lms_system_management.dto.group.GroupResponse;
 import com.lms.lms_system_management.model.GroupEntity;
@@ -29,20 +30,23 @@ class PutGroupControllerTest {
     @Autowired
     private GroupRepository groupRepository;
 
+    @Autowired
+    private StudentRepository studentRepository;
+
     private Long groupId;
 
     @BeforeEach
     public void setUp() {
-        GroupEntity groupEntity = GroupEntity.builder()
-                .name("Gruppa A")
-                .build();
+        GroupEntity groupEntity = new GroupEntity();
+        groupEntity.setName("Gruppa A");
         groupRepository.save(groupEntity);
         groupId = groupEntity.getId();
     }
 
     @AfterEach
     public void tearDown() {
-        groupRepository.deleteAll();
+        studentRepository.deleteAllInBatch();
+        groupRepository.deleteAllInBatch();
     }
 
     @Test

@@ -1,19 +1,32 @@
 package com.lms.lms_system_management.dao.specification;
 
+import com.lms.lms_system_management.dto.course.CourseFilter;
 import com.lms.lms_system_management.model.CourseEntity;
+import com.lms.lms_system_management.model.CourseEntity_;
+import com.lms.lms_system_management.model.TeacherEntity_;
+import jakarta.persistence.criteria.Predicate;
 import org.springframework.data.jpa.domain.Specification;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import static java.util.Optional.ofNullable;
 
 public class CourseSpecification {
 
-    public static Specification<CourseEntity> hasName(String name) {
+    public static Specification<CourseEntity> builder(CourseFilter filter) {
+        return (root, criteriaQuery, criteriaBuilder) -> {
+            List<Predicate> predicates = new ArrayList<>();
 
-        return ((root, query, criteriaBuilder) ->
-                name == null ? null : criteriaBuilder.like(root.get("name"), "%" + name + "%"));
-    }
+            ofNullable(filter.name()).ifPresent(name ->
+                    predicates.add(criteriaBuilder.like(root.get(CourseEntity_.name), "%" + name + "%")));
 
-    public static Specification<CourseEntity> hasTeacherId(Long teacherId) {
-        return ((root, query, criteriaBuilder) ->
-                teacherId == null ? null : criteriaBuilder.equal(root.get("teacherEntity").get("id"), teacherId));
+            ofNullable(filter.teacherId()).ifPresent(teacherId ->
+                    predicates.add(criteriaBuilder.equal(root.get(CourseEntity_.teacherEntity)
+                            .get(TeacherEntity_.id), teacherId)));
+
+            return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
+        };
     }
 }
 

@@ -12,7 +12,6 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 @ToString(exclude = "courses")
 @SQLRestriction("deleted=false")
 public class TeacherEntity {
