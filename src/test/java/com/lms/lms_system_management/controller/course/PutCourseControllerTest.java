@@ -1,98 +1,72 @@
 package com.lms.lms_system_management.controller.course;
 
-import com.lms.lms_system_management.TestcontainersConfiguration;
-import com.lms.lms_system_management.dto.course.UpdateCourseRequest;
-import com.lms.lms_system_management.dto.course.CourseResponse;
+import com.lms.lms_system_management.controller.BaseIntegrationTest;
+import com.lms.lms_system_management.dao.CourseRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.web.client.TestRestTemplate;
-import org.springframework.context.annotation.Import;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.jdbc.Sql;
 
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@Import(TestcontainersConfiguration.class)
 @Sql("/sql/insert-course-put.sql")
 @Sql(value = "/sql/clean.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
-public class PutCourseControllerTest {
+class PutCourseControllerTest extends BaseIntegrationTest {
 
     @Autowired
-    private TestRestTemplate restTemplate;
+    private CourseRepository courseRepository;
 
     @Test
-    void updateCourse_shouldReturn200AndUpdatedBody() {
-        UpdateCourseRequest request = new UpdateCourseRequest(
-                "Kotlin", "Kurs po Kotlin", 2L);
+    void updateCourse_shouldReturn200AndUpdatedBody() throws Exception {
+        mockMvc.perform(put("/api/courses/{id}", 1)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(readJson("course/update-request.json")))
+                .andExpect(status().isOk())
+                .andExpect(content().json(readJson("course/update-response.json")));
 
-        ResponseEntity<CourseResponse> response = restTemplate.exchange(
-                "/api/courses/{id}",
-                HttpMethod.PUT,
-                new HttpEntity<>(request),
-                CourseResponse.class,
-                1L
-        );
-
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-
-        CourseResponse body = response.getBody();
-
-        assertThat(body).isNotNull();
-        assertThat(body.id()).isEqualTo(1L);
-        assertThat(body.name()).isEqualTo("Kotlin");
-        assertThat(body.description()).isEqualTo("Kurs po Kotlin");
-        assertThat(body.teacher().id()).isEqualTo(2L);
+        var course = courseRepository.findById(1L).orElseThrow();
+        assertThat(course.getName()).isEqualTo("Kotlin");
+        assertThat(course.getDescription()).isEqualTo("Kurs po Kotlin");
+        assertThat(course.getTeacherEntity().getId()).isEqualTo(2L);
     }
 
     @ParameterizedTest
     @MethodSource("invalidUpdateCourseRequests")
-    void updateCourse_withInvalidBody_shouldReturn400(UpdateCourseRequest request) {
-        ResponseEntity<Void> response = restTemplate.exchange(
-                "/api/courses/{id}",
-                HttpMethod.PUT,
-                new HttpEntity<>(request),
-                Void.class,
-                88888L
-        );
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+    void updateCourse_withInvalidBody_shouldReturn400(String requestJson) throws Exception {
+        mockMvc.perform(put("/api/courses/{id}", 1)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestJson))
+                .andExpect(status().isBadRequest());
     }
 
-    static Stream<UpdateCourseRequest> invalidUpdateCourseRequests() {
+    static Stream<String> invalidUpdateCourseRequests() {
         return Stream.of(
-                new UpdateCourseRequest("", "Kurs po Spring", 99999L),
-                new UpdateCourseRequest("Spring Boot", "", 1L),
-                new UpdateCourseRequest("Spring Boot", "Kurs po Spring", null)
+                "{\"name\": \"\", \"description\": \"Kurs po Spring\", \"teacherId\": 1}",
+                "{\"name\": \"Spring Boot\", \"description\": \"\", \"teacherId\": 1}",
+                "{\"name\": \"Spring Boot\", \"description\": \"Kurs po Spring\", \"teacherId\": null}"
         );
     }
 
-    @ParameterizedTest
-    @MethodSource("notFoundUpdateCourseArgs")
-    void updateCourse_whenNotExists_shouldReturn404(UpdateCourseRequest request, Long courseId) {
-        ResponseEntity<Void> response = restTemplate.exchange(
-                "/api/courses/{id}",
-                HttpMethod.PUT,
-                new HttpEntity<>(request),
-                Void.class,
-                courseId
-        );
-
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+    @Test
+    void updateCourse_whenCourseNotExists_shouldReturn404() throws Exception {
+        mockMvc.perform(put("/api/courses/{id}", 99999)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(readJson("course/update-request.json")))
+                .andExpect(status().isNotFound());
     }
 
-    static Stream<Arguments> notFoundUpdateCourseArgs() {
-        return Stream.of(
-                Arguments.of(new UpdateCourseRequest("Spring", "Desc", 99999L), 88888L),
-                Arguments.of(new UpdateCourseRequest("Spring", "Desc", 1L), 99999L)
-        );
+    @Test
+    void updateCourse_whenTeacherNotExists_shouldReturn404() throws Exception {
+        mockMvc.perform(put("/api/courses/{id}", 1)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"name\": \"Spring\", \"description\": \"Desc\", \"teacherId\": 99999}"))
+                .andExpect(status().isNotFound());
     }
 }

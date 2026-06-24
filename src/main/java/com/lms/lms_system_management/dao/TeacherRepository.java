@@ -9,6 +9,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.Optional;
+
 @Repository
 public interface TeacherRepository extends JpaRepository<TeacherEntity, Long>,
         JpaSpecificationExecutor<TeacherEntity> {
@@ -21,4 +23,7 @@ public interface TeacherRepository extends JpaRepository<TeacherEntity, Long>,
     @Modifying
     @Query("UPDATE TeacherEntity t set t.deleted=true WHERE t.id=:id")
     int softDeletedById(@Param("id") Long id);
+
+    @Query(value = "SELECT * FROM teachers WHERE id = :id", nativeQuery = true)
+    Optional<TeacherEntity> findByIdIgnoringDeletedFlag(@Param("id") Long id);
 }

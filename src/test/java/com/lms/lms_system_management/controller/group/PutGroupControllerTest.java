@@ -1,78 +1,49 @@
 package com.lms.lms_system_management.controller.group;
 
-import com.lms.lms_system_management.TestcontainersConfiguration;
-import com.lms.lms_system_management.dto.group.UpdateGroupRequest;
-import com.lms.lms_system_management.dto.group.GroupResponse;
+import com.lms.lms_system_management.controller.BaseIntegrationTest;
+import com.lms.lms_system_management.dao.GroupRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.web.client.TestRestTemplate;
-import org.springframework.context.annotation.Import;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.jdbc.Sql;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@Import(TestcontainersConfiguration.class)
 @Sql("/sql/insert-group.sql")
 @Sql(value = "/sql/clean.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
-class PutGroupControllerTest {
+class PutGroupControllerTest extends BaseIntegrationTest {
 
     @Autowired
-    private TestRestTemplate restTemplate;
+    private GroupRepository groupRepository;
 
     @Test
-    void updateGroup_shouldReturn200AndUpdatedBody() {
-        UpdateGroupRequest request = new UpdateGroupRequest("Gruppa C");
+    void updateGroup_shouldReturn200AndUpdatedBody() throws Exception {
+        mockMvc.perform(put("/api/groups/{groupId}", 1)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(readJson("group/update-request.json")))
+                .andExpect(status().isOk())
+                .andExpect(content().json(readJson("group/update-response.json")));
 
-        ResponseEntity<GroupResponse> response = restTemplate.exchange(
-                "/api/groups/{groupId}",
-                HttpMethod.PUT,
-                new HttpEntity<>(request),
-                GroupResponse.class,
-                1L
-        );
-
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-
-        GroupResponse body = response.getBody();
-
-        assertThat(body).isNotNull();
-        assertThat(body.id()).isEqualTo(1L);
-        assertThat(body.name()).isEqualTo("Gruppa C");
+        var group = groupRepository.findById(1L).orElseThrow();
+        assertThat(group.getName()).isEqualTo("Gruppa C");
     }
 
     @Test
-    void updateGroup_whenNameIsBlank_shouldReturn400() {
-        UpdateGroupRequest request = new UpdateGroupRequest("");
-
-        ResponseEntity<Void> response = restTemplate.exchange(
-                "/api/groups/{groupId}",
-                HttpMethod.PUT,
-                new HttpEntity<>(request),
-                Void.class,
-                1L
-        );
-
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+    void updateGroup_whenNameIsBlank_shouldReturn400() throws Exception {
+        mockMvc.perform(put("/api/groups/{groupId}", 1)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"name\": \"\"}"))
+                .andExpect(status().isBadRequest());
     }
 
     @Test
-    void updateGroup_whenNotExists_shouldReturn404() {
-        UpdateGroupRequest request = new UpdateGroupRequest("Gruppa D");
-
-        ResponseEntity<Void> response = restTemplate.exchange(
-                "/api/groups/{groupId}",
-                HttpMethod.PUT,
-                new HttpEntity<>(request),
-                Void.class,
-                99999L
-        );
-
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+    void updateGroup_whenNotExists_shouldReturn404() throws Exception {
+        mockMvc.perform(put("/api/groups/{groupId}", 99999)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(readJson("group/update-request.json")))
+                .andExpect(status().isNotFound());
     }
 }

@@ -1,68 +1,56 @@
 package com.lms.lms_system_management.controller.teacher;
 
-import com.lms.lms_system_management.TestcontainersConfiguration;
-import com.lms.lms_system_management.dto.teacher.NewTeacherRequest;
-import com.lms.lms_system_management.dto.teacher.TeacherResponse;
+import com.lms.lms_system_management.controller.BaseIntegrationTest;
+import com.lms.lms_system_management.dao.TeacherRepository;
+import com.lms.lms_system_management.model.TeacherEntity;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.web.client.TestRestTemplate;
-import org.springframework.context.annotation.Import;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.jdbc.Sql;
 
+import java.util.List;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@Import(TestcontainersConfiguration.class)
 @Sql(value = "/sql/clean.sql",
-        executionPhase =Sql.ExecutionPhase.AFTER_TEST_METHOD)
-class PostTeacherEntityControllerTest {
+        executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
+class PostTeacherEntityControllerTest extends BaseIntegrationTest {
 
     @Autowired
-    private TestRestTemplate testRestTemplate;
+    private TeacherRepository teacherRepository;
 
     @Test
-    void createTeacher_shouldReturn201AndCorrectBody() {
-        NewTeacherRequest request = new NewTeacherRequest("Oleg", "Smirnov");
+    void createTeacher_shouldReturn201AndCorrectBody() throws Exception {
+        mockMvc.perform(post("/api/teachers")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(readJson("teacher/create-request.json")))
+                .andExpect(status().isCreated())
+                .andExpect(content().json(readJson("teacher/create-response.json")));
 
-        ResponseEntity<TeacherResponse> response = testRestTemplate.postForEntity(
-                "/api/teachers",
-                request,
-                TeacherResponse.class
-        );
-
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
-
-        TeacherResponse body = response.getBody();
-
-        assertThat(body).isNotNull();
-        assertThat(body.id()).isNotNull();
-        assertThat(body.firstName()).isEqualTo("Oleg");
-        assertThat(body.lastName()).isEqualTo("Smirnov");
+        List<TeacherEntity> teachers = teacherRepository.findAll();
+        assertThat(teachers.size()).isEqualTo(1);
+        assertThat(teachers.get(0).getFirstName()).isEqualTo("Oleg");
+        assertThat(teachers.get(0).getLastName()).isEqualTo("Smirnov");
     }
 
     @ParameterizedTest
     @MethodSource("invalidNewTeacherRequest")
-    void createTeacher_whenFirstNameIsInvalid_shouldReturn400(NewTeacherRequest request) {
-        ResponseEntity<Void> response = testRestTemplate.postForEntity(
-                "/api/teachers",
-                request,
-                Void.class
-        );
-
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+    void createTeacher_whenFirstNameIsInvalid_shouldReturn400(String requestJson) throws Exception {
+        mockMvc.perform(post("/api/teachers")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestJson))
+                .andExpect(status().isBadRequest());
     }
-
-    static Stream<NewTeacherRequest> invalidNewTeacherRequest() {
+    static Stream<String> invalidNewTeacherRequest() {
         return Stream.of(
-                new NewTeacherRequest("", "Smirnov"),
-                new NewTeacherRequest(" ", "Smirnov")
+                "{\"firstName\": \"\", \"lastName\": \"Smirnov\"}",
+                "{\"firstName\": \" \", \"lastName\": \"Smirnov\"}"
         );
     }
 }
