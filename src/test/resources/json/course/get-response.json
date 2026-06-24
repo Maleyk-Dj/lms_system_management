@@ -1,0 +1,10 @@
+{
+  "id": 1,
+  "name": "Java",
+  "description": "Kurs po razrabotke Java",
+  "teacher": {
+    "id": 1,
+    "firstName": "Li",
+    "lastName": "Dja"
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "totalElements": 1,
+  "content": [
+    {
+      "id": 1,
+      "group": {"id": 1},
+      "course": {"id": 1}
+    }
+  ]
+}
