@@ -6,8 +6,9 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 @SpringBootApplication
 public class SystemManagementApplication {
 
-	public static void main(String[] args) {
-		SpringApplication.run(SystemManagementApplication.class, args);
-	}
+    public static void main(String[] args) {
+
+        SpringApplication.run(SystemManagementApplication.class, args);
+    }
 
 }

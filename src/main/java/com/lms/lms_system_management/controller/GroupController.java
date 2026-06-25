@@ -1,10 +1,14 @@
 package com.lms.lms_system_management.controller;
 
-import com.lms.lms_system_management.dto.request.NewGroupRequest;
-import com.lms.lms_system_management.dto.request.UpdateGroupRequest;
-import com.lms.lms_system_management.dto.response.GroupResponse;
+import com.lms.lms_system_management.dto.group.GroupFilter;
+import com.lms.lms_system_management.dto.group.NewGroupRequest;
+import com.lms.lms_system_management.dto.group.UpdateGroupRequest;
+import com.lms.lms_system_management.dto.group.GroupResponse;
 import com.lms.lms_system_management.service.GroupService;
-import io.swagger.v3.oas.annotations.parameters.RequestBody;
+import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.web.bind.annotation.RequestBody;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
@@ -17,11 +21,6 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.DeleteMapping;
 
-
-
-
-import java.util.List;
-
 @RestController
 @RequestMapping("/api/groups")
 @RequiredArgsConstructor
@@ -31,22 +30,23 @@ public class GroupController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public GroupResponse createGroup(@RequestBody NewGroupRequest request) {
+    public GroupResponse createGroup(@Valid @RequestBody NewGroupRequest request) {
         return groupService.create(request);
     }
 
     @GetMapping("/{groupId}")
     public GroupResponse getGroupById(@PathVariable("groupId") Long id) {
-        return groupService.findById(id);
+        return groupService.getById(id);
     }
 
     @GetMapping
-    public List<GroupResponse> getGroups() {
-        return groupService.findAll();
+    public Page<GroupResponse> getGroups(GroupFilter filter, Pageable pageable) {
+
+        return groupService.getAll(filter, pageable);
     }
 
     @PutMapping("/{groupId}")
-    public GroupResponse updateGroup(@RequestBody UpdateGroupRequest request,
+    public GroupResponse updateGroup(@Valid @RequestBody UpdateGroupRequest request,
                                      @PathVariable("groupId") Long id) {
         return groupService.update(request, id);
     }

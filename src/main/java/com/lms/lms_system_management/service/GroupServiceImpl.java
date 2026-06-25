@@ -1,65 +1,64 @@
 package com.lms.lms_system_management.service;
 
 import com.lms.lms_system_management.dao.GroupRepository;
-import com.lms.lms_system_management.dto.request.NewGroupRequest;
-import com.lms.lms_system_management.dto.request.UpdateGroupRequest;
-import com.lms.lms_system_management.dto.response.GroupResponse;
+import com.lms.lms_system_management.dao.specification.GroupSpecification;
+import com.lms.lms_system_management.dto.group.GroupFilter;
+import com.lms.lms_system_management.dto.group.NewGroupRequest;
+import com.lms.lms_system_management.dto.group.UpdateGroupRequest;
+import com.lms.lms_system_management.dto.group.GroupResponse;
 import com.lms.lms_system_management.exception.NotFoundException;
 import com.lms.lms_system_management.mapper.GroupMapper;
-import com.lms.lms_system_management.model.Group;
+import com.lms.lms_system_management.model.GroupEntity;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class GroupServiceImpl implements GroupService {
+
     private final GroupRepository groupRepository;
     private final GroupMapper groupMapper;
 
     @Override
     public GroupResponse create(NewGroupRequest newGroup) {
-        Group saved=groupRepository.save(groupMapper.toEntity(newGroup));
+        GroupEntity saved = groupRepository.save(groupMapper.toEntity(newGroup));
         return groupMapper.toResponse(saved);
     }
 
-    @Transactional (readOnly = true)
     @Override
-    public GroupResponse findById(Long id) {
-        Group groupEntity = groupRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Группа с id " + id + "  не найдена"));
+    public GroupResponse getById(Long id) {
+        GroupEntity groupEntity = groupRepository.findByIdOrThrow(id);
         return groupMapper.toResponse(groupEntity);
     }
 
     @Transactional(readOnly = true)
     @Override
-    public List<GroupResponse> findAll() {
-        return groupRepository.findAll()
-                .stream()
-                .map(groupMapper::toResponse)
-                .toList();
+    public Page<GroupResponse> getAll(GroupFilter filter, Pageable pageable) {
+        return groupRepository.findAll(GroupSpecification.builder(filter), pageable)
+                .map(groupMapper::toResponse);
     }
 
     @Transactional
     @Override
     public GroupResponse update(UpdateGroupRequest updateGroupRequest, Long id) {
-        Group updated = groupRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Группа с id " + id + "  не найдена"));
+        GroupEntity updated = groupRepository.findByIdOrThrow(id);
         groupMapper.updateGroup(updateGroupRequest, updated);
-        Group saved = groupRepository.save(updated);
+        GroupEntity saved = groupRepository.save(updated);
         return groupMapper.toResponse(saved);
     }
 
     @Transactional
     @Override
     public void deleteById(Long id) {
-        Group deleted = groupRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Группа с таким ID " + id + "  не найдена"));
-        groupRepository.delete(deleted);
+        int updated = groupRepository.softDeleteById(id);
 
+        if (updated == 0) {
+            throw new NotFoundException("Группа с id" + id + "не найдена");
+        }
     }
 }

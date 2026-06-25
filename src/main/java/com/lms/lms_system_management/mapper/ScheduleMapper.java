@@ -1,23 +1,34 @@
 package com.lms.lms_system_management.mapper;
 
-import com.lms.lms_system_management.dto.request.NewScheduleRequest;
-import com.lms.lms_system_management.dto.request.UpdateScheduleRequest;
-import com.lms.lms_system_management.dto.response.ScheduleResponse;
-import com.lms.lms_system_management.model.Course;
-import com.lms.lms_system_management.model.Group;
-import com.lms.lms_system_management.model.Schedule;
+import com.lms.lms_system_management.dto.schedule.NewScheduleRequest;
+import com.lms.lms_system_management.dto.schedule.UpdateScheduleRequest;
+import com.lms.lms_system_management.dto.schedule.ScheduleResponse;
+import com.lms.lms_system_management.model.CourseEntity;
+import com.lms.lms_system_management.model.GroupEntity;
+import com.lms.lms_system_management.model.ScheduleEntity;
 import org.mapstruct.*;
 
 @Mapper(componentModel = "spring")
 public interface ScheduleMapper {
 
     @Mapping(target = "id", ignore = true)
-    Schedule toEntity(NewScheduleRequest newScheduleRequest, Group group, Course course);
+    @Mapping(target = "groupEntity", source = "groupEntity")
+    @Mapping(target = "courseEntity", source = "courseEntity")
+    @Mapping(source = "newScheduleRequest.date", target = "dateClass")
+    @Mapping(target = "deleted", ignore = true)
+    ScheduleEntity toEntity(NewScheduleRequest newScheduleRequest, GroupEntity groupEntity,
+                            CourseEntity courseEntity);
 
-    ScheduleResponse toResponse(Schedule schedule);
+    @Mapping(source = "dateClass", target = "date")
+    @Mapping(source = "groupEntity", target = "group")
+    @Mapping(source = "courseEntity", target = "course")
+    ScheduleResponse toResponse(ScheduleEntity scheduleEntity);
 
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "group", source = "group")
-    @Mapping(target = "course", source = "course")
-    void updateSchedule(UpdateScheduleRequest request, Group group, Course course, @MappingTarget Schedule schedule);
+    @Mapping(target = "groupEntity", source = "groupEntity")
+    @Mapping(target = "courseEntity", source = "courseEntity")
+    @Mapping(source = "request.date", target = "dateClass")
+    @Mapping(target = "deleted", ignore = true)
+    void updateSchedule(UpdateScheduleRequest request, GroupEntity groupEntity,
+                        CourseEntity courseEntity, @MappingTarget ScheduleEntity scheduleEntity);
 }
